@@ -174,6 +174,7 @@ public class CalibratorView extends Application {
         signalParametersContainer.getChildren().addAll(elementsList);
         return signalParametersContainer;
     }
+
     private LineChart<Number, Number> createSignalChart() {
 
         xAxisSignalChart = new NumberAxis();
@@ -193,8 +194,6 @@ public class CalibratorView extends Application {
         VBox.setVgrow(signalChart, Priority.ALWAYS);
         return signalChart;
     }
-
-
 
     @Override
     public void start(Stage stage) {
