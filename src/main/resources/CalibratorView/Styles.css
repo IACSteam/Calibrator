@@ -1,6 +1,6 @@
 .polynomial-Chart {
     /*-fx-hgrow-policy: always;*/
-    -fx-pref-height: 250;
+    -fx-pref-height: 350;
     -fx-pref-width: 420;
     -fx-background-color: #e2ecfe;
 }
@@ -8,6 +8,26 @@
 .polynomial-Chart .chart-title {
   -fx-text-fill: #4682b4;
   -fx-font-size: 1.6em;
+  -fx-animated: false;
+}
+
+.polynomial-Chart .default-color1.chart-series-line {
+    -fx-stroke: transparent;
+}
+.polynomial-Chart .default-color1.chart-line-symbol {
+    -fx-background-color: blue, blue;
+    -fx-background-radius: 3px;
+    -fx-padding: 3px;
+}
+
+.polynomial-Chart .default-color0.chart-line-symbol {
+    -fx-background-color: transparent, orange;
+    -fx-background-radius: 0px;
+    -fx-padding: 0px;
+}
+
+.polynomial-Chart .default-color0.chart-series-line {
+    -fx-stroke: orange;
 }
 
 .signal-Chart .chart-series-line {

@@ -1,0 +1,41 @@
+package prog.calibrator.View;
+
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+public interface CalibratorViewInterface {
+    VBox getMainContainer();
+    HBox getCalibrationInformationContainer();
+    LineChart<Number, Number> getPolynomialChart();
+    NumberAxis getXAxisPolynomialChart();
+    NumberAxis getYAxisPolynomialChart();
+    LineChart.Series getPolynomialGraphSeries();
+    LineChart.Series getPolynomialPointsSeries();
+    HBox getCalibrationPointsInteractionContainer();
+    VBox getCalibrationPointsContainer();
+    TableView getCalibrationTable();
+    TableColumn getRawDataColumnCalibrationTable();
+    TableColumn getRealDataColumnCalibrationTable();
+    HBox getCalibrationSettersContainer();
+    TextField getRawDataCalibrationSetter();
+    TextField getRealDataCalibrationSetter();
+    CheckBox getEnablePolynomial();
+    VBox getCalibrationButtonsContainer();
+    Button getAddCalibrationButton();
+    Button getDeleteCalibrationButton();
+    Button getChangeCalibrationButton();
+    Button getCreateConnectionButton();
+    LineChart<Number, Number> getSignalChart();
+    NumberAxis getXAxisSignalChart();
+    NumberAxis getYAxisSignalChart();
+    HBox getSignalParametersContainer();
+    TextField getPolynomialFormulaIndicator();
+    TextField getSignalAmplitudeIndicator();
+    TextField getSignalMaximumIndicator();
+    TextField getSignalMinimumIndicator();
+    TextField getSignalAverageIndicator();
+    TextField getSignalRMSIndicator();
+}

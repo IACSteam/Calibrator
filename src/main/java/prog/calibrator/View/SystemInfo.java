@@ -1,4 +1,4 @@
-package prog.calibrator;
+package prog.calibrator.View;
 
 public class SystemInfo {
 

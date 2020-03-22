@@ -11,7 +11,7 @@ public class ViewConstants {
     final static String ADD_CALIBRATION_BUTTON_TEXT = "Добавить";
     final static String DELETE_CALIBRATION_BUTTON_TEXT = "Удалить";
     final static String CHANGE_CALIBRATION_BUTTON_TEXT = "Изменить";
-    final static String CREATE_CONNECTION_BUTTON_TEXT = "Связь";
+    final static String CREATE_CONNECTION_BUTTON_TEXT = "Generate";
     final static String RAW_DATA_CALIBRATION_SETTER_LABEL = "Сигнал";
     final static String REAL_DATA_CALIBRATION_SETTER_LABEL = "Значение";
     final static String ENABLE_POLYNOMIAL_TEXT = "Применить полином";
