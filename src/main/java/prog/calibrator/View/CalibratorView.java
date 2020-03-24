@@ -1,6 +1,8 @@
 package prog.calibrator.View;
 
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -20,7 +22,6 @@ import java.util.List;
  */
 public class CalibratorView /*extends Application*/ implements CalibratorViewInterface {
 
-    private ObservableList<LineChart.Data> calibrationPoints;
     private XYChart.Series<Number, Number> signalDataSeries;
     private NumberAxis xAxis;
     private Timeline animation;
@@ -34,13 +35,13 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     /* *//* *//* */ LineChart<Number, Number> polynomialChart;
     /* *//* *//* *//* */ NumberAxis xAxisPolynomialChart;
     /* *//* *//* *//* */ NumberAxis yAxisPolynomialChart;
-    /* *//* *//* *//* */ LineChart.Series polynomialGraphSeries;
-    /* *//* *//* *//* */ LineChart.Series polynomialPointsSeries;
+    /* *//* *//* *//* */ LineChart.Series<Number, Number> polynomialGraphSeries;
+    /* *//* *//* *//* */ LineChart.Series<Number, Number> polynomialPointsSeries;
     /* *//* *//* */ HBox calibrationPointsInteractionContainer;
     /* *//* *//* *//* */ VBox calibrationPointsContainer;
-    /* *//* *//* *//* *//* */ TableView calibrationTable;
-    /* *//* *//* *//* *//* *//* */ TableColumn rawDataColumnCalibrationTable;
-    /* *//* *//* *//* *//* *//* */ TableColumn realDataColumnCalibrationTable;
+    /* *//* *//* *//* *//* */ TableView<LineChart.Data<Number, Number>> calibrationTable;
+    /* *//* *//* *//* *//* *//* */ TableColumn <LineChart.Data<Number, Number>, Number> rawDataColumnCalibrationTable;
+    /* *//* *//* *//* *//* *//* */ TableColumn <LineChart.Data<Number, Number>, Number> realDataColumnCalibrationTable;
     /* *//* *//* *//* *//* */ HBox calibrationSettersContainer;
     /* *//* *//* *//* *//* *//* */ TextField rawDataCalibrationSetter;
     /* *//* *//* *//* *//* *//* */ TextField realDataCalibrationSetter;
@@ -53,13 +54,14 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     /* *//* *//* */ LineChart<Number, Number> signalChart;
     /* *//* *//* *//* */ NumberAxis xAxisSignalChart;
     /* *//* *//* *//* */ NumberAxis yAxisSignalChart;
-    /* *//* */ HBox signalParametersContainer;
+    /* *//* */ HBox signalIndicatorsContainer;
     /* *//* *//* */ TextField polynomialFormulaIndicator;
-    /* *//* *//* */ TextField signalAmplitudeIndicator;
-    /* *//* *//* */ TextField signalMaximumIndicator;
-    /* *//* *//* */ TextField signalMinimumIndicator;
-    /* *//* *//* */ TextField signalAverageIndicator;
-    /* *//* *//* */ TextField signalRMSIndicator;
+    /* *//* */ /* */HBox signalParametersContainer;
+    /* *//* *//* *//* */ TextField signalAmplitudeIndicator;
+    /* *//* *//* *//* */ TextField signalMaximumIndicator;
+    /* *//* *//* *//* */ TextField signalMinimumIndicator;
+    /* *//* *//* *//* */ TextField signalAverageIndicator;
+    /* *//* *//* *//* */ TextField signalRMSIndicator;
     StackPane systemInfoPane;
 
     private Scene createScene() {
@@ -78,7 +80,7 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         calibrationInformationContainer.getChildren().add(createPolynomialChart());
         calibrationInformationContainer.getChildren().add(createCalibrationPointsInteractionContainer());
         mainContainer.getChildren().addAll(calibrationInformationContainer);
-        mainContainer.getChildren().addAll(createSignalParametersContainer());
+        mainContainer.getChildren().addAll(createSignalIndicatorsContainer()/*createSignalParametersContainer()*/);
         mainContainer.getChildren().addAll(createSignalChart());
         return mainContainer;
     }
@@ -96,8 +98,9 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         polynomialChart.setTitle(ViewConstants.POLYNOMIAL_CHART_TEXT);
         polynomialChart.setAnimated(false);
         polynomialChart.setLegendVisible(false);
-        polynomialGraphSeries = new XYChart.Series();
-        polynomialPointsSeries = new XYChart.Series();
+        polynomialGraphSeries = new XYChart.Series<>();
+        polynomialPointsSeries = new XYChart.Series<>();
+        //polynomialChart.getData().add(polynomialGraphSeries);
         HBox.setHgrow(polynomialChart, Priority.ALWAYS);
         return polynomialChart;
     }
@@ -115,14 +118,13 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         calibrationPointsContainer = new VBox();
         calibrationTable = new TableView();
         calibrationTable.getStyleClass().add("calibration-Table");
-        rawDataColumnCalibrationTable = new TableColumn(ViewConstants.X_AXIS_POLYNOMIAL_CHART_TEXT);
-        realDataColumnCalibrationTable = new TableColumn(ViewConstants.Y_AXIS_POLYNOMIAL_CHART_TEXT);
+        rawDataColumnCalibrationTable = new TableColumn<>(ViewConstants.X_AXIS_POLYNOMIAL_CHART_TEXT);
+        realDataColumnCalibrationTable = new TableColumn<>(ViewConstants.Y_AXIS_POLYNOMIAL_CHART_TEXT);
         calibrationTable.setEditable(false);
         calibrationTable.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         calibrationTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         calibrationTable.getColumns().addAll(rawDataColumnCalibrationTable, realDataColumnCalibrationTable);
         calibrationTable.setPlaceholder(new Text("No data"));
-        calibrationTable.setItems(calibrationPoints);
         enablePolynomial = new CheckBox(ViewConstants.ENABLE_POLYNOMIAL_TEXT);
         enablePolynomial.getStyleClass().add("enable-Polynomial");
         calibrationPointsContainer.getChildren().addAll(calibrationTable, createCalibrationSettersContainer(), enablePolynomial);
@@ -158,9 +160,21 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         return calibrationButtonsContainer;
     }
 
+    private HBox createSignalIndicatorsContainer() {
+        HBox signalIndicatorsContainer = new HBox();
+        polynomialFormulaIndicator = new TextField();
+        Label polynomialFormula = new Label(ViewConstants.POLYNOMIAL_FORMULA_INDICATOR_LABEL, polynomialFormulaIndicator);
+        polynomialFormula.setContentDisplay(ContentDisplay.BOTTOM);
+        polynomialFormulaIndicator.getStyleClass().add("polynomial-Formula-Indicator");
+        Region region = new Region();
+        HBox.setHgrow(region, Priority.ALWAYS);
+        signalIndicatorsContainer.getChildren().addAll(region, createSignalParametersContainer(), polynomialFormula);
+        signalIndicatorsContainer.getStyleClass().add("signal-Indicators-Container");
+        return signalIndicatorsContainer;
+    }
     private HBox createSignalParametersContainer() {
         signalParametersContainer = new HBox();
-        polynomialFormulaIndicator = new TextField();
+
         signalAmplitudeIndicator = new TextField();
         signalMaximumIndicator = new TextField();
         signalMinimumIndicator = new TextField();
@@ -168,7 +182,6 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         signalRMSIndicator = new TextField();
         List<Label> elementsList = new LinkedList<>();
 
-        elementsList.add(new Label(ViewConstants.POLYNOMIAL_FORMULA_INDICATOR_LABEL, polynomialFormulaIndicator));
         elementsList.add(new Label(ViewConstants.SIGNAL_AMPLITUDE_INDICATOR_LABEL, signalAmplitudeIndicator));
         elementsList.add(new Label(ViewConstants.SIGNAL_MAXIMUM_INDICATOR_LABEL, signalMaximumIndicator));
         elementsList.add(new Label(ViewConstants.SIGNAL_MINIMUM_INDICATOR_LABEL, signalMinimumIndicator));
@@ -178,6 +191,7 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
             element.setContentDisplay(ContentDisplay.BOTTOM);
         }
         signalParametersContainer.getChildren().addAll(elementsList);
+        signalParametersContainer.getStyleClass().add("signal-Parameters-Container");
         return signalParametersContainer;
     }
 
@@ -210,9 +224,18 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         stage.setMinWidth(ViewConstants.WINDOW_WIDTH);
         stage.setMinHeight(ViewConstants.WINDOW_HEIGHT);
         stage.setScene(scene);
+        bindings();
         stage.show();
     }
-
+    private void bindings() {
+        signalParametersContainer.prefWidthProperty().bind(polynomialChart.widthProperty());
+        polynomialChart.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth) {
+                signalParametersContainer.setSpacing(((double) newWidth - (75*5) - 20) / 4);
+            }
+        });
+    };
     private Pane addSystemInfoPane() {
         var javaVersion = SystemInfo.javaVersion();
         var javafxVersion = SystemInfo.javafxVersion();
@@ -253,11 +276,11 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         return yAxisPolynomialChart;
     }
 
-    public LineChart.Series getPolynomialGraphSeries() {
+    public LineChart.Series<Number, Number> getPolynomialGraphSeries() {
         return polynomialGraphSeries;
     }
 
-    public LineChart.Series getPolynomialPointsSeries() {
+    public LineChart.Series<Number, Number> getPolynomialPointsSeries() {
         return polynomialPointsSeries;
     }
 
@@ -269,15 +292,15 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         return calibrationPointsContainer;
     }
 
-    public TableView getCalibrationTable() {
+    public TableView<LineChart.Data<Number, Number>> getCalibrationTable() {
         return calibrationTable;
     }
 
-    public TableColumn getRawDataColumnCalibrationTable() {
+    public TableColumn<LineChart.Data<Number, Number>, Number> getRawDataColumnCalibrationTable() {
         return rawDataColumnCalibrationTable;
     }
 
-    public TableColumn getRealDataColumnCalibrationTable() {
+    public TableColumn<LineChart.Data<Number, Number>, Number> getRealDataColumnCalibrationTable() {
         return realDataColumnCalibrationTable;
     }
 

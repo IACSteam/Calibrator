@@ -27,14 +27,14 @@ public class CalibratorController {
 
     private void bindViewAndModel() {
         calibratorView.getRawDataColumnCalibrationTable().
-                setCellValueFactory(new PropertyValueFactory<LineChart.Data, Double>("XValue"));
+                setCellValueFactory(new PropertyValueFactory<LineChart.Data<Number, Number>, Number>("XValue"));
         calibratorView.getRealDataColumnCalibrationTable().
-                setCellValueFactory(new PropertyValueFactory<LineChart.Data, Double>("YValue"));
+                setCellValueFactory(new PropertyValueFactory<LineChart.Data<Number, Number>, Number>("YValue"));
         calibratorView.getCalibrationTable().setItems(calibrationModel.getObservableListForPoints());
         calibratorView.getPolynomialGraphSeries().setData(calibrationModel.getObservableListForPolynomial());
         calibratorView.getPolynomialPointsSeries().setData(calibrationModel.getObservableListForPoints());
-        calibratorView.getPolynomialChart().getData().addAll(calibratorView.getPolynomialGraphSeries(),
-                calibratorView.getPolynomialPointsSeries());
+        calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialGraphSeries());
+        calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialPointsSeries());
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
     }
 }

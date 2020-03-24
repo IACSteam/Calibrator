@@ -8,16 +8,14 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CalibratorModel implements CalibratorModelInterface {
 
-    private ObservableList<LineChart.Data> listForPoints;
-    private ObservableList<LineChart.Data> listForPolynomial;
+    private ObservableList<LineChart.Data<Number, Number>> listForPoints;
+    private ObservableList<LineChart.Data<Double, Double>> listForPointsLocal;
+    private ObservableList<LineChart.Data<Number, Number>> listForPolynomial;
     private ArrayList<PolynomialObserver> polynomialObservers = new ArrayList<PolynomialObserver>();
     private CalculatePolynomial calculatePolynomial;
     private String polynomialString;
@@ -28,10 +26,10 @@ public class CalibratorModel implements CalibratorModelInterface {
         polynomial = new SimpleStringProperty("y = 1.0x + 0");
         listForPoints = FXCollections.observableArrayList();
         listForPolynomial = FXCollections.observableArrayList();
-        listForPoints.add(new LineChart.Data(0, 0));
-        listForPolynomial.add(new LineChart.Data(0, 0));
-        listForPoints.add(new LineChart.Data(1, 1));
-        listForPolynomial.add(new LineChart.Data(1, 1));
+        listForPoints.add(new LineChart.Data<>(0, 0));
+        listForPolynomial.add(new LineChart.Data<>(0, 0));
+        listForPoints.add(new LineChart.Data<>(1, 1));
+        listForPolynomial.add(new LineChart.Data<>(1, 1));
         calculatePolynomial = new CalculatePolynomial();
         createEventListeners();
     }
@@ -42,12 +40,13 @@ public class CalibratorModel implements CalibratorModelInterface {
 
 
     @Override
-    public ObservableList<LineChart.Data> getObservableListForPoints() {
+    public ObservableList<LineChart.Data<Number, Number>> getObservableListForPoints() {
+
         return listForPoints;
     }
 
     @Override
-    public ObservableList<LineChart.Data> getObservableListForPolynomial() {
+    public ObservableList<LineChart.Data<Number, Number>> getObservableListForPolynomial() {
 
         return listForPolynomial;
     }
@@ -62,7 +61,7 @@ public class CalibratorModel implements CalibratorModelInterface {
     @Override
     public void addDataItem(Double xCoordinate, Double yCoordinate) {
         Platform.runLater( () -> {
-            listForPoints.add(new LineChart.Data(xCoordinate, yCoordinate));
+            listForPoints.add(new LineChart.Data<>(xCoordinate, yCoordinate));
         });
     }
 
@@ -81,13 +80,11 @@ public class CalibratorModel implements CalibratorModelInterface {
     public void generateRandomData() {
         int max = 10;
         Random random = new Random();
-        ArrayList<LineChart.Data> aaa = new ArrayList<LineChart.Data>();
-        ArrayList<LineChart.Data> bbb = new ArrayList<LineChart.Data>();
+        ArrayList<LineChart.Data<Number, Number>> aaa = new ArrayList<>();
         for (int i = 1; i < max; i++) {
-            Double value1 = Double.valueOf(2*i);
-            Double value2 = Double.valueOf(10+i+random.nextInt(10));
-
-            aaa.add(new LineChart.Data(value1, value2));
+            double value1 = 2 * i;
+            double value2 = 10 + i + random.nextInt(10);
+            aaa.add(new LineChart.Data<>(value1, value2));
         }
 
         Platform.runLater( () -> {
@@ -116,11 +113,11 @@ public class CalibratorModel implements CalibratorModelInterface {
     }
 
     private void createEventListeners() {
-        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data> e) -> {
+        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
             calculatePolynomialData();
         });
 
-        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data> e) -> {
+        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
             //TODO: make event handler (Maybe in another place)
         });
 
@@ -128,30 +125,31 @@ public class CalibratorModel implements CalibratorModelInterface {
 
     private void calculatePolynomialData() {
 
-        Map<Double, Double> dataToLoad = listForPoints.stream().collect(
-                Collectors.toMap(LineChart.Data<Double, Double>::getXValue, LineChart.Data<Double, Double>::getYValue));
-        double[] coefficients = calculatePolynomial.loadData(dataToLoad);
+        /*Map<Number, Number> dataToLoad = listForPoints.stream().collect(
+                Collectors.toMap(LineChart.Data<Number, Number>::getXValue, LineChart.Data<Number, Number>::getYValue));*/
+        Map<Double, Double> polynomialPoints = new TreeMap<>();
+        for (int i = 0; i < listForPoints.size(); i++) {
+            polynomialPoints.put((double)listForPoints.get(i).getXValue(), (double)listForPoints.get(i).getYValue());
+        }
+        double[] coefficients = calculatePolynomial.loadData(polynomialPoints);
         String[] signs = new String[3];
-        //System.out.println(coefficients);
-        ArrayList<LineChart.Data> plot = new ArrayList<LineChart.Data>();
-        List listOfPointsX = listForPoints.stream().map(p -> p.getXValue()).sorted().collect(Collectors.toList());
+        ArrayList<LineChart.Data<Number, Number>> plot = new ArrayList<>();
+        List<Number> listOfPointsX = listForPoints.stream().map(p -> p.getXValue()).sorted().collect(Collectors.toList());
 
         if( listOfPointsX.size()>1 ) {
-            Double min = (Double) listOfPointsX.get(0);
-            Double max = (Double) listOfPointsX.get(listOfPointsX.size() - 1);
-            Double delta = (max - min) / 100;
-            Double border = delta * 10;
-            for (Double i = min-border; i<max+border; i=i+delta) {
-                Double value1 = Double.valueOf(i);
-                Double value2 = Double.valueOf(coefficients[0] * i + coefficients[1]);
-                plot.add(new LineChart.Data(value1, value2));
+            double min = (double) listOfPointsX.get(0);
+            double max = (double) listOfPointsX.get(listOfPointsX.size() - 1);
+            double delta = (max - min) / 100;
+            double border = delta * 10;
+            for (double i = min-border; i<max+border; i=i+delta) {
+                double value2 = coefficients[0] * i + coefficients[1];
+                plot.add(new LineChart.Data<>(i, value2));
             }
         } else if( listOfPointsX.size() == 1 ) {
-            Double min = (Double) listOfPointsX.get(0);
-            for (Double i = min-5; i < min+5; i=i+1) {
-                Double value1 = Double.valueOf(i);
-                Double value2 = Double.valueOf(coefficients[0] * i + coefficients[1]);
-                plot.add(new LineChart.Data(value1, value2));
+            double min = (double) listOfPointsX.get(0);
+            for (double i = min-5; i < min+5; i=i+1) {
+                double value2 = coefficients[0] * i + coefficients[1];
+                plot.add(new LineChart.Data<>(i, value2));
             }
         }
         int i = 0;

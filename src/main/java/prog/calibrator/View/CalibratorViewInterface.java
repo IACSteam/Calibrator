@@ -12,13 +12,13 @@ public interface CalibratorViewInterface {
     LineChart<Number, Number> getPolynomialChart();
     NumberAxis getXAxisPolynomialChart();
     NumberAxis getYAxisPolynomialChart();
-    LineChart.Series getPolynomialGraphSeries();
-    LineChart.Series getPolynomialPointsSeries();
+    LineChart.Series<Number, Number> getPolynomialGraphSeries();
+    LineChart.Series<Number, Number> getPolynomialPointsSeries();
     HBox getCalibrationPointsInteractionContainer();
     VBox getCalibrationPointsContainer();
-    TableView getCalibrationTable();
-    TableColumn getRawDataColumnCalibrationTable();
-    TableColumn getRealDataColumnCalibrationTable();
+    TableView<LineChart.Data<Number, Number>> getCalibrationTable();
+    TableColumn<LineChart.Data<Number, Number>, Number> getRawDataColumnCalibrationTable();
+    TableColumn<LineChart.Data<Number, Number>, Number> getRealDataColumnCalibrationTable();
     HBox getCalibrationSettersContainer();
     TextField getRawDataCalibrationSetter();
     TextField getRealDataCalibrationSetter();
