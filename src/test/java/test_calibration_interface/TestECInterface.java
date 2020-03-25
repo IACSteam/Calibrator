@@ -1,5 +1,6 @@
 package test_calibration_interface;
 import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
+import prog.calibrator.electrical_cabinet_model.model.CabinetExample;
 import prog.calibrator.electrical_cabinet_model.observer.EventType;
 import prog.calibrator.electrical_cabinet_model.observer.ObserverElectricalCabinet;
 

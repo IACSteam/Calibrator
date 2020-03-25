@@ -2,6 +2,7 @@ package prog.calibrator.View;
 
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -29,6 +30,7 @@ public interface CalibratorViewInterface {
     Button getChangeCalibrationButton();
     Button getCreateConnectionButton();
     LineChart<Number, Number> getSignalChart();
+    XYChart.Series<Number, Number> getSignalGraphSeries();
     NumberAxis getXAxisSignalChart();
     NumberAxis getYAxisSignalChart();
     HBox getSignalParametersContainer();

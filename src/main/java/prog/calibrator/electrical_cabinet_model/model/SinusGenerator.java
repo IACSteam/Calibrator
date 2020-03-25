@@ -1,4 +1,4 @@
-package test_calibration_interface;
+package prog.calibrator.electrical_cabinet_model.model;
 import java.util.*;
 
 /**

@@ -36,5 +36,6 @@ public class CalibratorController {
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialGraphSeries());
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialPointsSeries());
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
+        calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
     }
 }

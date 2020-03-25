@@ -3,6 +3,9 @@ package prog.calibrator.Model;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+
+import java.util.List;
 
 public interface CalibratorModelInterface {
     ObservableList<LineChart.Data<Number, Number>> getObservableListForPoints();
@@ -15,4 +18,5 @@ public interface CalibratorModelInterface {
     void registerObserver(PolynomialObserver observer);
     void removeObserver(PolynomialObserver observer);
     StringProperty getPolynomialProperty();
+    List<XYChart.Data<Number, Number>> getSignalChartData();
 }

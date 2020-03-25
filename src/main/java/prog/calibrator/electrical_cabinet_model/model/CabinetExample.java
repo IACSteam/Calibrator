@@ -1,6 +1,5 @@
-package test_calibration_interface;
+package prog.calibrator.electrical_cabinet_model.model;
 
-import org.w3c.dom.ls.LSOutput;
 import prog.calibrator.electrical_cabinet_model.channels.ReceiveChannel;
 import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
 import prog.calibrator.electrical_cabinet_model.observer.EventType;
@@ -8,7 +7,7 @@ import prog.calibrator.electrical_cabinet_model.observer.Observable;
 
 import java.util.concurrent.Semaphore;
 
-class CabinetExample extends Observable implements CalibrationInterface {
+public class CabinetExample extends Observable implements CalibrationInterface {
     ReceiveChannel[] channels;
     Float data [][];
     Thread thr ;
@@ -133,8 +132,9 @@ class JThread extends Thread {
         sin = new SinusGenerator(3600);
     }
     public void run() {
-        while (TestECInterface.THREADS_STATUS) {
-
+        int cnt = 50000;
+        while (cnt > 0) {
+            --cnt;
             try {
                 sem.acquire();
                 for (int i = 0; i < data.length; i++) {
@@ -148,7 +148,7 @@ class JThread extends Thread {
             this.handler.handler(EventType.Data);
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(20);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

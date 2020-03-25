@@ -1,43 +1,90 @@
 package prog.calibrator.Model;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import javafx.util.Duration;
+import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
+import prog.calibrator.electrical_cabinet_model.model.CabinetExample;
+import prog.calibrator.electrical_cabinet_model.observer.EventType;
+import prog.calibrator.electrical_cabinet_model.observer.ObserverElectricalCabinet;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CalibratorModel implements CalibratorModelInterface {
+public class CalibratorModel implements CalibratorModelInterface, ObserverElectricalCabinet {
 
     private ObservableList<LineChart.Data<Number, Number>> listForPoints;
-    private ObservableList<LineChart.Data<Double, Double>> listForPointsLocal;
     private ObservableList<LineChart.Data<Number, Number>> listForPolynomial;
+    private List<XYChart.Data<Number, Number>> signalChartData;
     private ArrayList<PolynomialObserver> polynomialObservers = new ArrayList<PolynomialObserver>();
     private CalculatePolynomial calculatePolynomial;
     private String polynomialString;
     private StringProperty polynomial;
+    private Timeline animation;
+    private CalibrationInterface cabinetExample;
 
     public CalibratorModel() {
 
         polynomial = new SimpleStringProperty("y = 1.0x + 0");
+        initPolynomialData();
+        initSignalChartData(1000);
+        calculatePolynomial = new CalculatePolynomial();
+        createEventListeners();
+    }
+
+    private void initPolynomialData() {
+
         listForPoints = FXCollections.observableArrayList();
         listForPolynomial = FXCollections.observableArrayList();
         listForPoints.add(new LineChart.Data<>(0, 0));
         listForPolynomial.add(new LineChart.Data<>(0, 0));
         listForPoints.add(new LineChart.Data<>(1, 1));
         listForPolynomial.add(new LineChart.Data<>(1, 1));
-        calculatePolynomial = new CalculatePolynomial();
-        createEventListeners();
+    }
+
+    private void initSignalChartData(int amountOfPoints) {
+
+        cabinetExample = new CabinetExample();
+        signalChartData = new ArrayList<>();
+        for (double m = 0; m < amountOfPoints; m++) {
+            signalChartData.add(new XYChart.Data<Number, Number>(m, 10));
+        }
+        cabinetExample.subscribe(this);
+
+        final KeyFrame frame =
+                new KeyFrame(Duration.millis(1000 / 50),
+                        (ActionEvent actionEvent) -> {
+                            //Date date = new Date();
+                            //System.out.println("before: " + date.getTime());
+                                //nextTime();
+                                updatePlot();
+//
+                        });
+        animation = new Timeline();
+        animation.getKeyFrames().add(frame);
+        animation.setCycleCount(Animation.INDEFINITE);
+        play();
     }
 
     public static void main(String[] args) {
 
     }
 
+    @Override
+    public List<XYChart.Data<Number, Number>> getSignalChartData() {
+        return signalChartData;
+    }
 
     @Override
     public ObservableList<LineChart.Data<Number, Number>> getObservableListForPoints() {
@@ -168,11 +215,43 @@ public class CalibratorModel implements CalibratorModelInterface {
         notifyPolynomialObservers();
     }
 
+    private void updatePlot() {
+
+        Float[] arr = new Float[0];
+        try {
+            arr = cabinetExample.getChannelData(0);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //final ObservableList<XYChart.Data<Number, Number>> minuteList =
+        //        sinusDataSeries.getData();
+        for (int i = 0; i < 1000; i++) {
+            signalChartData.get(i).setYValue(arr[i]);
+            //minuteList.get(i).setXValue(i + x);
+        }
+    }
+
+    public void play() {
+        //animation.play();
+    }
+
     public String getPolynomial() {
         return polynomial.get();
     }
 
     public StringProperty getPolynomialProperty() {
         return polynomial;
+    }
+
+    @Override
+    public void notify(EventType e) {
+        if(e == EventType.Data) {
+            //Date date = new Date();
+            //System.out.println("before: " + date.getTime());
+            //System.out.println("before: " + date.getTime());
+           Platform.runLater(()-> updatePlot()
+           );
+            updatePlot();
+        }
     }
 }

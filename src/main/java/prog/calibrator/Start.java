@@ -9,6 +9,8 @@ import prog.calibrator.View.CalibratorView;
 import static javafx.application.Application.launch;
 
 public class Start extends Application {
+    public static boolean THREADS_STOP = false;
+
     public static void main(String[] args) {
         launch(args);
     }

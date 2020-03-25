@@ -22,7 +22,6 @@ import java.util.List;
  */
 public class CalibratorView /*extends Application*/ implements CalibratorViewInterface {
 
-    private XYChart.Series<Number, Number> signalDataSeries;
     private NumberAxis xAxis;
     private Timeline animation;
 
@@ -52,6 +51,7 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     /* *//* *//* *//* *//* */ Button changeCalibrationButton;
     /* *//* *//* *//* *//* */ Button createConnectionButton;
     /* *//* *//* */ LineChart<Number, Number> signalChart;
+    /* *//* *//* *//* */ LineChart.Series<Number, Number> signalGraphSeries;
     /* *//* *//* *//* */ NumberAxis xAxisSignalChart;
     /* *//* *//* *//* */ NumberAxis yAxisSignalChart;
     /* *//* */ HBox signalIndicatorsContainer;
@@ -197,8 +197,8 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
 
     private LineChart<Number, Number> createSignalChart() {
 
-        xAxisSignalChart = new NumberAxis();
-        yAxisSignalChart = new NumberAxis();
+        xAxisSignalChart = new NumberAxis(0, 1000, 100);
+        yAxisSignalChart = new NumberAxis(-3, 3, 1);
         xAxisSignalChart.setLabel(ViewConstants.X_AXIS_SIGNAL_CHART_TEXT);
         yAxisSignalChart.setLabel(ViewConstants.Y_AXIS_SIGNAL_CHART_TEXT);
         signalChart = new LineChart<>(xAxisSignalChart, yAxisSignalChart);
@@ -209,7 +209,8 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         signalChart.setLegendVisible(false);
         signalChart.setTitle(ViewConstants.SIGNAL_CHART_TITLE);
         xAxisSignalChart.setForceZeroInRange(false);
-        signalDataSeries = new XYChart.Series<>();
+        signalGraphSeries = new XYChart.Series<>();
+        signalChart.getData().add(signalGraphSeries);
         HBox.setHgrow(signalChart, Priority.ALWAYS);
         VBox.setVgrow(signalChart, Priority.ALWAYS);
         return signalChart;
@@ -343,6 +344,10 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
 
     public LineChart<Number, Number> getSignalChart() {
         return signalChart;
+    }
+
+    public XYChart.Series<Number, Number> getSignalGraphSeries() {
+        return signalGraphSeries;
     }
 
     public NumberAxis getXAxisSignalChart() {
