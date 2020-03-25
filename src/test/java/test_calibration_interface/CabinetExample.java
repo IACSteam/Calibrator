@@ -1,21 +1,32 @@
 package test_calibration_interface;
 
+import org.w3c.dom.ls.LSOutput;
 import prog.calibrator.electrical_cabinet_model.channels.ReceiveChannel;
 import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
 import prog.calibrator.electrical_cabinet_model.observer.EventType;
 import prog.calibrator.electrical_cabinet_model.observer.Observable;
 
+import java.util.concurrent.Semaphore;
+
 class CabinetExample extends Observable implements CalibrationInterface {
     ReceiveChannel[] channels;
     Float data [][];
     Thread thr ;
+    private Semaphore sem;
 
     public CabinetExample() {
         this.channels = new ReceiveChannel[2];
-        this.channels[0] = new ReceiveChannel(1,0,"Current",1,1,1,3000.f,-3000.f);
-        this.channels[1] = new ReceiveChannel(1,1,"Voltage",1,1,1,3000.f,-3000.f);
+        Float[][] calibrationPoints = {
+                {0.0f, 0.0f},
+                {1.0f, 1.0f}
+        };
+        this.channels[0] = new ReceiveChannel(1, 0, "Current", 1,
+                0, 0, 3000.f, -3000.f, calibrationPoints);
+        this.channels[1] = new ReceiveChannel(1,1,"Voltage",1,
+                0,0,3000.f,-3000.f,calibrationPoints);
         this.data = new Float[2][1000];
-        thr = new JThread(data,(e) -> update(e));
+        this.sem = new Semaphore(1);
+        thr = new JThread(data,(e) -> update(e),sem);
         thr.start();
     }
 
@@ -69,20 +80,32 @@ class CabinetExample extends Observable implements CalibrationInterface {
     }
 
     @Override
-    public Float[] getChannelData(String channelName) {
+    public Float[] getChannelData(String channelName) throws InterruptedException {
         for(ReceiveChannel ch: this.channels){
-            if(ch.getChannelName().equals(channelName))
-                return this.data[ ch.getChannelNumber() ];
+            if(ch.getChannelName().equals(channelName)) {
+                sem.acquire();
+                int len = this.data[ch.getChannelNumber()].length;
+                Float[] clone = new Float[len];
+                System.arraycopy(this.data[ch.getChannelNumber()], 0, clone, 0, len);
+                sem.release();
+                return clone;
+            }
         }
         return null;
     }
 
     @Override
-    public Float[] getChannelData(int channelNumber) {
+    public Float[] getChannelData(int channelNumber) throws InterruptedException {
 
         for(ReceiveChannel ch: this.channels){
-            if(ch.getChannelNumber() == channelNumber)
-                return this.data[ channelNumber ];
+            if(ch.getChannelNumber() == channelNumber) {
+                sem.acquire();
+                int len = this.data[ch.getChannelNumber()].length;
+                Float[] clone = new Float[len];
+                System.arraycopy(this.data[ch.getChannelNumber()], 0, clone, 0, len);
+                sem.release();
+                return clone;
+            }
         }
         return null;
     }
@@ -101,17 +124,26 @@ class JThread extends Thread {
     Float[][] data;
     SinusGenerator sin;
     Handler handler;
+    private Semaphore sem;
 
-    JThread(Float data[][], Handler handler){
+    JThread(Float data[][], Handler handler, Semaphore sem){
         this.data =  data;
         this.handler = handler;
+        this.sem = sem;
         sin = new SinusGenerator(3600);
     }
-
     public void run() {
         while (TestECInterface.THREADS_STATUS) {
-            for (int i = 0; i < data.length; i++) {
-                data[i] = sin.getSignalData( data[i].length);
+
+            try {
+                sem.acquire();
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = sin.getSignalData( data[i].length);
+                }
+                sem.release();
+            } catch (InterruptedException e) {
+//                e.printStackTrace();
+                System.out.println("С семафором в потоке обновления данных при записи что-то пошло не так.");
             }
             this.handler.handler(EventType.Data);
 

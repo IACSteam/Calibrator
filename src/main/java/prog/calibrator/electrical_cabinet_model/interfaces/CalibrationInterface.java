@@ -9,9 +9,9 @@ public interface CalibrationInterface {
     ReceiveChannel getReceiveChannel(String channelName);
     boolean setReceiveChannel(ReceiveChannel[] receiveChannels);
     boolean setReceiveChannel(ReceiveChannel receiveChannel);
-    Float[] getChannelData(String channelName);
-    Float[] getChannelData(int channelNumber);
+    Float[] getChannelData(String channelName) throws InterruptedException;
+    Float[] getChannelData(int channelNumber) throws InterruptedException;
     void subscribe(ObserverElectricalCabinet observer);
     void unsubscribe(ObserverElectricalCabinet observer);
-    Thread getThread();
+    Thread getThread(); //will be deleted
 }

@@ -37,6 +37,7 @@ class TestECInterface implements ObserverElectricalCabinet {
             }
         }
 
+
         TestECInterface.THREADS_STATUS = false;
         Thread t = cabinet.getThread();
         try{
@@ -52,6 +53,10 @@ class TestECInterface implements ObserverElectricalCabinet {
 
     @Override
     public void notify(EventType e) {
-        System.out.println(this.cabinet.getChannelData(0)[0]);
+        try {
+            System.out.println(this.cabinet.getChannelData(0)[0]);
+        }catch (InterruptedException ex){
+            System.out.println(e);
+        }
     }
 }

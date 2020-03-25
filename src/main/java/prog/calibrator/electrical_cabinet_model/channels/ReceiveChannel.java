@@ -9,9 +9,10 @@ public class ReceiveChannel {
     private float coefficient3;
     private Float errorLimitHigh;
     private Float errorLimitLow;
+    private Float[][] calibrationPoints;
 
     public ReceiveChannel(int electricalCabinetID, int channelNumber, String channelName, float coefficient1,
-                          float coefficient2, float coefficient3, Float errorLimitHigh, Float errorLimitLow) {
+                          float coefficient2, float coefficient3, Float errorLimitHigh, Float errorLimitLow, Float[][] calibrationPoints) {
         this.electricalCabinetID = electricalCabinetID;
         this.channelNumber = channelNumber;
         this.channelName = channelName;
@@ -20,6 +21,22 @@ public class ReceiveChannel {
         this.coefficient3 = coefficient3;
         this.errorLimitHigh = errorLimitHigh;
         this.errorLimitLow = errorLimitLow;
+        this.calibrationPoints = new Float[2][calibrationPoints[0].length];
+        System.arraycopy(calibrationPoints[0],0,this.calibrationPoints[0],0, calibrationPoints[0].length);
+        System.arraycopy(calibrationPoints[1], 0, this.calibrationPoints[1], 0, calibrationPoints[1].length);
+    }
+
+    public Float[][] getCalibrationPoints() {
+        Float[][] clone = new Float[2][this.calibrationPoints[0].length];
+        System.arraycopy(this.calibrationPoints[0],0, clone[0], 0, this.calibrationPoints[0].length);
+        System.arraycopy(this.calibrationPoints[1],0, clone[1], 0, this.calibrationPoints[1].length);
+        return clone;
+    }
+
+    public void setCalibrationPoints(Float[][] calibrationPoints) {
+        System.arraycopy(calibrationPoints[0],0,this.calibrationPoints[0],0, calibrationPoints[0].length);
+        System.arraycopy(calibrationPoints[1], 0, this.calibrationPoints[1], 0, calibrationPoints[1].length);
+
     }
 
     public int getElectricalCabinetID() {
@@ -89,7 +106,7 @@ public class ReceiveChannel {
     @Override
     public ReceiveChannel clone(){
         return new ReceiveChannel( this.electricalCabinetID, this.channelNumber, this.channelName,
-                this.coefficient1, this.coefficient2, this.coefficient3, this.errorLimitHigh, this.errorLimitLow);
+                this.coefficient1, this.coefficient2, this.coefficient3, this.errorLimitHigh, this.errorLimitLow, this.calibrationPoints);
     }
     public void replace(ReceiveChannel channel){
         this.electricalCabinetID = channel.electricalCabinetID;
@@ -100,5 +117,8 @@ public class ReceiveChannel {
         this.coefficient3 = channel.coefficient3;
         this.errorLimitHigh = channel.errorLimitHigh;
         this.errorLimitLow = channel.errorLimitLow;
+        System.arraycopy(channel.calibrationPoints[0],0,this.calibrationPoints[0],0, calibrationPoints[0].length);
+        System.arraycopy(channel.calibrationPoints[1], 0, this.calibrationPoints[1], 0, calibrationPoints[1].length);
+
     }
 }
