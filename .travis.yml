@@ -1,0 +1,21 @@
+# https://docs.travis-ci.com/user/languages/java/
+language: java
+jdk: oraclejdk13
+sudo: false
+script:
+  - mvn clean compile verify
+
+
+    # Improve Build Speed https://dzone.com/articles/travis-ci-tutorial-java-projects
+    #cache:
+    #directories:
+  #- $HOME
+
+# Notifications https://docs.travis-ci.com/user/notifications/
+notifications:
+  email:
+    recipients:
+      - golod_nick@mail.ru
+      - andrey.i.khrapkov@gmail.com
+    on_success: never # default: change
+    on_failure: always # default: always
