@@ -4,22 +4,22 @@ public class ReceiveChannel {
     private int electricalCabinetID;
     private int channelNumber;
     private String channelName;
-    private float coeficient_1;
-    private float coeficient_2;
-    private float coeficient_3;
-    private Float errorLinitHigh;
-    private Float errorLinitLow;
+    private float coefficient1;
+    private float coefficient2;
+    private float coefficient3;
+    private Float errorLimitHigh;
+    private Float errorLimitLow;
 
-    public ReceiveChannel(int electricalCabinetID, int channelNumber, String channelName, float coeficient_1,
-                          float coeficient_2, float coeficient_3, Float errorLinitHigh, Float errorLinitLow) {
+    public ReceiveChannel(int electricalCabinetID, int channelNumber, String channelName, float coefficient1,
+                          float coefficient2, float coefficient3, Float errorLimitHigh, Float errorLimitLow) {
         this.electricalCabinetID = electricalCabinetID;
         this.channelNumber = channelNumber;
         this.channelName = channelName;
-        this.coeficient_1 = coeficient_1;
-        this.coeficient_2 = coeficient_2;
-        this.coeficient_3 = coeficient_3;
-        this.errorLinitHigh = errorLinitHigh;
-        this.errorLinitLow = errorLinitLow;
+        this.coefficient1 = coefficient1;
+        this.coefficient2 = coefficient2;
+        this.coefficient3 = coefficient3;
+        this.errorLimitHigh = errorLimitHigh;
+        this.errorLimitLow = errorLimitLow;
     }
 
     public int getElectricalCabinetID() {
@@ -46,59 +46,59 @@ public class ReceiveChannel {
         this.channelName = channelName;
     }
 
-    public float getCoeficient_1() {
-        return coeficient_1;
+    public float getCoefficient1() {
+        return coefficient1;
     }
 
-    public void setCoeficient_1(float coeficient_1) {
-        this.coeficient_1 = coeficient_1;
+    public void setCoefficient1(float coefficient1) {
+        this.coefficient1 = coefficient1;
     }
 
-    public float getCoeficient_2() {
-        return coeficient_2;
+    public float getCoefficient2() {
+        return coefficient2;
     }
 
-    public void setCoeficient_2(float coeficient_2) {
-        this.coeficient_2 = coeficient_2;
+    public void setCoefficient2(float coefficient2) {
+        this.coefficient2 = coefficient2;
     }
 
-    public float getCoeficient_3() {
-        return coeficient_3;
+    public float getCoefficient3() {
+        return coefficient3;
     }
 
-    public void setCoeficient_3(float coeficient_3) {
-        this.coeficient_3 = coeficient_3;
+    public void setCoefficient3(float coefficient3) {
+        this.coefficient3 = coefficient3;
     }
 
-    public Float getErrorLinitHigh() {
-        return errorLinitHigh;
+    public Float getErrorLimitHigh() {
+        return errorLimitHigh;
     }
 
-    public void setErrorLinitHigh(Float errorLinitHigh) {
-        this.errorLinitHigh = errorLinitHigh;
+    public void setErrorLimitHigh(Float errorLimitHigh) {
+        this.errorLimitHigh = errorLimitHigh;
     }
 
-    public Float getErrorLinitLow() {
-        return errorLinitLow;
+    public Float getErrorLimitLow() {
+        return errorLimitLow;
     }
 
-    public void setErrorLinitLow(Float errorLinitLow) {
-        this.errorLinitLow = errorLinitLow;
+    public void setErrorLimitLow(Float errorLimitLow) {
+        this.errorLimitLow = errorLimitLow;
     }
 
     @Override
     public ReceiveChannel clone(){
         return new ReceiveChannel( this.electricalCabinetID, this.channelNumber, this.channelName,
-                this.coeficient_1, this.coeficient_2, this.coeficient_3, this.errorLinitHigh, this.errorLinitLow );
+                this.coefficient1, this.coefficient2, this.coefficient3, this.errorLimitHigh, this.errorLimitLow);
     }
     public void replace(ReceiveChannel channel){
         this.electricalCabinetID = channel.electricalCabinetID;
         this.channelNumber = channel.channelNumber;
         this.channelName = channel.channelName;
-        this.coeficient_1 = channel.coeficient_1;
-        this.coeficient_2 = channel.coeficient_2;
-        this.coeficient_3 = channel.coeficient_3;
-        this.errorLinitHigh = channel.errorLinitHigh;
-        this.errorLinitLow = channel.errorLinitLow;
+        this.coefficient1 = channel.coefficient1;
+        this.coefficient2 = channel.coefficient2;
+        this.coefficient3 = channel.coefficient3;
+        this.errorLimitHigh = channel.errorLimitHigh;
+        this.errorLimitLow = channel.errorLimitLow;
     }
 }
