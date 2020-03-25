@@ -229,6 +229,7 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     }
     private void bindings() {
         signalParametersContainer.prefWidthProperty().bind(polynomialChart.widthProperty());
+        polynomialFormulaIndicator.prefWidthProperty().bind(calibrationPointsInteractionContainer.widthProperty());
         polynomialChart.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldWidth, Number newWidth) {
