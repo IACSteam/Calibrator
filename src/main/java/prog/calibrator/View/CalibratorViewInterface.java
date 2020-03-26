@@ -40,4 +40,6 @@ public interface CalibratorViewInterface {
     TextField getSignalMinimumIndicator();
     TextField getSignalAverageIndicator();
     TextField getSignalRMSIndicator();
+
+    ListView<String> getChannelsList();
 }

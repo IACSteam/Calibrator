@@ -19,4 +19,5 @@ public interface CalibratorModelInterface {
     void removeObserver(PolynomialObserver observer);
     StringProperty getPolynomialProperty();
     List<XYChart.Data<Number, Number>> getSignalChartData();
+    ObservableList<String> getListOfChannels();
 }

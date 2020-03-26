@@ -3,6 +3,7 @@ package prog.calibrator.View;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -30,7 +31,8 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     BorderPane borderPaneContainer;
     /* */ VBox mainContainer;
     /* *//* */ HBox calibrationInformationContainer;
-    /* *//* *//* */ AnchorPane DimasPane;
+    /* *//* *//* */ HBox DimasContainer;
+    /* *//* *//* *//* */ ListView<String> channelsList;
     /* *//* *//* */ LineChart<Number, Number> polynomialChart;
     /* *//* *//* *//* */ NumberAxis xAxisPolynomialChart;
     /* *//* *//* *//* */ NumberAxis yAxisPolynomialChart;
@@ -245,9 +247,16 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         return systemInfoPane = new StackPane(label);
     }
 
-    private AnchorPane createDimasContainer() {
-        AnchorPane DimasContainer = new AnchorPane();
+    private HBox createDimasContainer() {
+        DimasContainer = new HBox();
         DimasContainer.setPrefSize(450, 250);
+        channelsList = new ListView<String>();
+        /*ObservableList<String> seasonList = FXCollections.<String>observableArrayList(
+                "Spring", "Summer", "Fall", "Winter");
+        seasons.getItems().addAll(seasonList);*/
+        Label placeHolder = new Label("No seasons available for selection.");
+        channelsList.setPlaceholder(placeHolder);
+        DimasContainer.getChildren().add(channelsList);
         return DimasContainer;
     }
 
@@ -384,6 +393,10 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
 
     public TextField getSignalRMSIndicator() {
         return signalRMSIndicator;
+    }
+
+    public ListView<String> getChannelsList() {
+        return channelsList;
     }
 }
 

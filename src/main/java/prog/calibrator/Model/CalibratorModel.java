@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.util.Duration;
+import prog.calibrator.electrical_cabinet_model.channels.ReceiveChannel;
 import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
 import prog.calibrator.electrical_cabinet_model.model.CabinetExample;
 import prog.calibrator.electrical_cabinet_model.observer.EventType;
@@ -32,13 +33,16 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private String polynomialString;
     private StringProperty polynomial;
     private Timeline animation;
-    private CalibrationInterface cabinetExample;
+    private CalibrationInterface cabinetExample = new CabinetExample();
+    private ObservableList<String> listOfChannels;
+    private ReceiveChannel[] receiveChannels;
 
     public CalibratorModel() {
 
         polynomial = new SimpleStringProperty("y = 1.0x + 0");
         initPolynomialData();
         initSignalChartData(1000);
+        getAllChannelsData();
         calculatePolynomial = new CalculatePolynomial();
         createEventListeners();
     }
@@ -55,7 +59,6 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     private void initSignalChartData(int amountOfPoints) {
 
-        cabinetExample = new CabinetExample();
         signalChartData = new ArrayList<>();
         for (double m = 0; m < amountOfPoints; m++) {
             signalChartData.add(new XYChart.Data<Number, Number>(m, 10));
@@ -75,6 +78,14 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         animation.getKeyFrames().add(frame);
         animation.setCycleCount(Animation.INDEFINITE);
         play();
+    }
+
+    private void getAllChannelsData() {
+        listOfChannels = FXCollections.observableArrayList();
+        receiveChannels = cabinetExample.getReceiveChannel();
+        for(ReceiveChannel receiveChannel:receiveChannels) {
+            listOfChannels.add(receiveChannel.getChannelName());
+        }
     }
 
     public static void main(String[] args) {
@@ -253,5 +264,9 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
            );
             updatePlot();
         }
+    }
+
+    public ObservableList<String> getListOfChannels() {
+        return listOfChannels;
     }
 }
