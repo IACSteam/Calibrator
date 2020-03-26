@@ -46,6 +46,12 @@ public class CalibratorController {
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
         calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
         calibratorView.getChannelsList().getItems().addAll(calibrationModel.getListOfChannels());
+
+        calibratorView.getSignalAmplitudeIndicator().textProperty().bind(calibrationModel.amplitudeSignalProperty().asString("%.3f"));
+        calibratorView.getSignalMaximumIndicator().textProperty().bind(calibrationModel.maxValueSignalProperty().asString("%.3f"));
+        calibratorView.getSignalMinimumIndicator().textProperty().bind(calibrationModel.minValueSignalProperty().asString("%.3f"));
+        calibratorView.getSignalAverageIndicator().textProperty().bind(calibrationModel.meanValueSignalProperty().asString("%.3f"));
+        calibratorView.getSignalRMSIndicator().textProperty().bind(calibrationModel.rmsValueSignalProperty().asString("%.3f"));
     }
 
     private void addCalibrationDataItem() {

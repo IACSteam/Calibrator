@@ -132,7 +132,7 @@ class JThread extends Thread {
         sin = new SinusGenerator(3600);
     }
     public void run() {
-        int cnt = 50000;
+        int cnt = 500;
         while (cnt > 0) {
             --cnt;
             try {
@@ -148,7 +148,7 @@ class JThread extends Thread {
             this.handler.handler(EventType.Data);
 
             try {
-                Thread.sleep(20);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

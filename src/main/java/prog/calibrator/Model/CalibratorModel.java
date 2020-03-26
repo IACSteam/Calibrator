@@ -4,8 +4,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -32,6 +31,12 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private CalculatePolynomial calculatePolynomial;
     private String polynomialString;
     private StringProperty polynomial;
+    private DoubleProperty amplitudeSignal = new SimpleDoubleProperty();
+    private DoubleProperty maxValueSignal = new SimpleDoubleProperty();
+    private DoubleProperty minValueSignal = new SimpleDoubleProperty();
+    private DoubleProperty meanValueSignal = new SimpleDoubleProperty();
+    private DoubleProperty rmsValueSignal = new SimpleDoubleProperty();
+
     private Timeline animation;
     private CalibrationInterface cabinetExample = new CabinetExample();
     private ObservableList<String> listOfChannels;
@@ -51,10 +56,10 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
         listForPoints = FXCollections.observableArrayList();
         listForPolynomial = FXCollections.observableArrayList();
-        listForPoints.add(new LineChart.Data<>(0, 0));
-        listForPolynomial.add(new LineChart.Data<>(0, 0));
-        listForPoints.add(new LineChart.Data<>(1, 1));
-        listForPolynomial.add(new LineChart.Data<>(1, 1));
+        listForPoints.add(new LineChart.Data<>(0.0, 0.0));
+        listForPolynomial.add(new LineChart.Data<>(0.0, 0.0));
+        listForPoints.add(new LineChart.Data<>(1.0, 1.0));
+        listForPolynomial.add(new LineChart.Data<>(1.0, 1.0));
     }
 
     private void initSignalChartData(int amountOfPoints) {
@@ -70,8 +75,8 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
                         (ActionEvent actionEvent) -> {
                             //Date date = new Date();
                             //System.out.println("before: " + date.getTime());
-                                //nextTime();
-                                updatePlot();
+                            //nextTime();
+                            //updatePlot();
 //
                         });
         animation = new Timeline();
@@ -83,7 +88,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private void getAllChannelsData() {
         listOfChannels = FXCollections.observableArrayList();
         receiveChannels = cabinetExample.getReceiveChannel();
-        for(ReceiveChannel receiveChannel:receiveChannels) {
+        for (ReceiveChannel receiveChannel : receiveChannels) {
             listOfChannels.add(receiveChannel.getChannelName());
         }
     }
@@ -111,14 +116,14 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     @Override
     public void deleteDataItem(int index) {
-        if( index>=0 ) {
+        if (index >= 0) {
             listForPoints.remove(index);
         }
     }
 
     @Override
     public void addDataItem(Double xCoordinate, Double yCoordinate) {
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             listForPoints.add(new LineChart.Data<>(xCoordinate, yCoordinate));
         });
     }
@@ -131,7 +136,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     @Override
     public boolean checkIfXIsUnique(Double xCoordinate) {
         System.out.println(xCoordinate);
-        return !listForPoints.stream().map(p -> p.getXValue()).anyMatch( p -> p.equals(xCoordinate) );
+        return !listForPoints.stream().map(p -> p.getXValue()).anyMatch(p -> p.equals(xCoordinate));
     }
 
     @Override
@@ -145,7 +150,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
             aaa.add(new LineChart.Data<>(value1, value2));
         }
 
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             listForPoints.clear();
             listForPoints.addAll(aaa);
         });
@@ -159,23 +164,23 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     @Override
     public void removeObserver(PolynomialObserver observer) {
         int i = polynomialObservers.indexOf(observer);
-        if( i>=0 ) {
+        if (i >= 0) {
             polynomialObservers.remove(observer);
         }
     }
 
     private void notifyPolynomialObservers() {
-        for( PolynomialObserver observer : polynomialObservers) {
+        for (PolynomialObserver observer : polynomialObservers) {
             observer.updatePolynomialText(polynomialString);
         }
     }
 
     private void createEventListeners() {
-        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
+        listForPoints.addListener((ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
             calculatePolynomialData();
         });
 
-        listForPoints.addListener( (ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
+        listForPoints.addListener((ListChangeListener.Change<? extends LineChart.Data<Number, Number>> e) -> {
             //TODO: make event handler (Maybe in another place)
         });
 
@@ -187,39 +192,39 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
                 Collectors.toMap(LineChart.Data<Number, Number>::getXValue, LineChart.Data<Number, Number>::getYValue));*/
         Map<Double, Double> polynomialPoints = new TreeMap<>();
         for (int i = 0; i < listForPoints.size(); i++) {
-            polynomialPoints.put((double)listForPoints.get(i).getXValue(), (double)listForPoints.get(i).getYValue());
+            polynomialPoints.put((double) listForPoints.get(i).getXValue(), (double) listForPoints.get(i).getYValue());
         }
         double[] coefficients = calculatePolynomial.loadData(polynomialPoints);
         String[] signs = new String[3];
         ArrayList<LineChart.Data<Number, Number>> plot = new ArrayList<>();
         List<Number> listOfPointsX = listForPoints.stream().map(p -> p.getXValue()).sorted().collect(Collectors.toList());
 
-        if( listOfPointsX.size()>1 ) {
+        if (listOfPointsX.size() > 1) {
             double min = (double) listOfPointsX.get(0);
             double max = (double) listOfPointsX.get(listOfPointsX.size() - 1);
             double delta = (max - min) / 100;
             double border = delta * 10;
-            for (double i = min-border; i<max+border; i=i+delta) {
+            for (double i = min - border; i < max + border; i = i + delta) {
                 double value2 = coefficients[0] * i + coefficients[1];
                 plot.add(new LineChart.Data<>(i, value2));
             }
-        } else if( listOfPointsX.size() == 1 ) {
+        } else if (listOfPointsX.size() == 1) {
             double min = (double) listOfPointsX.get(0);
-            for (double i = min-5; i < min+5; i=i+1) {
+            for (double i = min - 5; i < min + 5; i = i + 1) {
                 double value2 = coefficients[0] * i + coefficients[1];
                 plot.add(new LineChart.Data<>(i, value2));
             }
         }
         int i = 0;
-        for( double coefficient : coefficients ) {
-            signs[i] = coefficient>0 ? "+" : "-";
+        for (double coefficient : coefficients) {
+            signs[i] = coefficient > 0 ? "+" : "-";
             i++;
         }
-        if( signs[0].equals("+") ) signs[0] = " ";
+        if (signs[0].equals("+")) signs[0] = " ";
 
         polynomialString = String.format("y = %s %.3fx %s %.3f", signs[0], Math.abs(coefficients[0]), signs[1], Math.abs(coefficients[1]));
         polynomial.set(polynomialString);
-        Platform.runLater( () -> {
+        Platform.runLater(() -> {
             listForPolynomial.clear();
             listForPolynomial.addAll(plot);
         });
@@ -228,18 +233,36 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     private void updatePlot() {
 
+        double mean = 0, max = 0, min = 0, amplitude = 0, rms = 0;
         Float[] arr = new Float[0];
         try {
             arr = cabinetExample.getChannelData(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        max = min = arr[0];
         //final ObservableList<XYChart.Data<Number, Number>> minuteList =
         //        sinusDataSeries.getData();
-        for (int i = 0; i < 1000; i++) {
+        Date date = new Date();
+        System.out.println("before: " + date.getTime());
+        for (int i = 0; i < arr.length; i++) {
             signalChartData.get(i).setYValue(arr[i]);
             //minuteList.get(i).setXValue(i + x);
+            max = max < arr[i] ? arr[i] : max;
+            min = min > arr[i] ? arr[i] : min;
+            mean += arr[i];
+            rms += Math.pow(arr[i], 2);
         }
+        mean = mean / arr.length;
+        rms = Math.sqrt(rms / arr.length);
+        amplitude = max - min;
+        amplitudeSignal.set(amplitude);
+        maxValueSignal.set( max);
+        minValueSignal.set(min);
+        meanValueSignal.set(mean);
+        rmsValueSignal.set(rms);
+        Date date1 = new Date();
+        //System.out.println(amplitude +" "+max +" "+min +" "+mean +" "+rms);
     }
 
     public void play() {
@@ -256,14 +279,35 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     @Override
     public void notify(EventType e) {
-        if(e == EventType.Data) {
+        if (e == EventType.Data) {
             //Date date = new Date();
             //System.out.println("before: " + date.getTime());
             //System.out.println("before: " + date.getTime());
-           Platform.runLater(()-> updatePlot()
-           );
-            updatePlot();
+            Platform.runLater(() -> updatePlot()
+            );
+            //updatePlot();
         }
+    }
+
+    public DoubleProperty amplitudeSignalProperty() {
+        return amplitudeSignal;
+    }
+
+    public DoubleProperty maxValueSignalProperty() {
+        return maxValueSignal;
+    }
+
+
+    public DoubleProperty minValueSignalProperty() {
+        return minValueSignal;
+    }
+
+    public DoubleProperty meanValueSignalProperty() {
+        return meanValueSignal;
+    }
+
+    public DoubleProperty rmsValueSignalProperty() {
+        return rmsValueSignal;
     }
 
     public ObservableList<String> getListOfChannels() {

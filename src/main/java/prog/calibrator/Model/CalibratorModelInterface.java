@@ -1,5 +1,6 @@
 package prog.calibrator.Model;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
@@ -20,4 +21,10 @@ public interface CalibratorModelInterface {
     StringProperty getPolynomialProperty();
     List<XYChart.Data<Number, Number>> getSignalChartData();
     ObservableList<String> getListOfChannels();
+
+    DoubleProperty amplitudeSignalProperty();
+    DoubleProperty maxValueSignalProperty();
+    DoubleProperty minValueSignalProperty();
+    DoubleProperty meanValueSignalProperty();
+    DoubleProperty rmsValueSignalProperty();
 }
