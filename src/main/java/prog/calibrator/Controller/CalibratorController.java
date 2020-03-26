@@ -23,6 +23,14 @@ public class CalibratorController {
         calibratorView.getCreateConnectionButton().setOnMouseReleased((value) -> {
             calibrationModel.generateRandomData();
         });
+
+//        calibratorView.getRawDataCalibrationSetter().setOnKeyReleased((keyEvent) -> { checkPolynomialPointsInputFields(); });
+//        calibratorView.getRealDataCalibrationSetter().setOnKeyReleased((keyEvent) -> { checkPolynomialPointsInputFields(); });
+        calibratorView.getRawDataCalibrationSetter().textProperty().addListener(
+                (observable, oldValue, newValue) -> {checkPolynomialPointsInputFields();});
+        calibratorView.getRealDataCalibrationSetter().textProperty().addListener(
+                (observable, oldValue, newValue) -> {checkPolynomialPointsInputFields();});
+        calibratorView.getAddCalibrationButton().setOnMouseReleased((mouseEvent) -> { addCalibrationDataItem(); });
     }
 
     private void bindViewAndModel() {
@@ -38,5 +46,41 @@ public class CalibratorController {
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
         calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
         calibratorView.getChannelsList().getItems().addAll(calibrationModel.getListOfChannels());
+    }
+
+    private void addCalibrationDataItem() {
+        try {
+            Double rawElement = checkElement( calibratorView.getRawDataCalibrationSetter().getText() );
+            Double realElement = checkElement( calibratorView.getRealDataCalibrationSetter().getText() );
+            calibrationModel.addDataItem(rawElement, realElement);
+        } catch (IllegalCalibrationPointException e) {
+            calibratorView.getAddCalibrationButton().setDisable(true);
+        }
+    }
+
+    private void checkPolynomialPointsInputFields() {
+        try {
+            Double rawElement = checkElement( calibratorView.getRawDataCalibrationSetter().getText() );
+            Double realElement = checkElement( calibratorView.getRealDataCalibrationSetter().getText() );
+            calibratorView.getAddCalibrationButton().setDisable(false);
+        } catch (IllegalCalibrationPointException e) {
+            calibratorView.getAddCalibrationButton().setDisable(true);
+        }
+    }
+
+    private Double checkElement(String text) throws IllegalCalibrationPointException {
+
+        try {
+            Double value = Double.valueOf(text);
+//            view.makeButtonAddEnabled();
+//            xCoordinate = true;
+//            changeAddButtonState();
+            return value;
+        } catch (NumberFormatException e) {
+//            view.makeButtonAddDisabled();
+//            xCoordinate = false;
+//            changeAddButtonState();
+            throw new IllegalCalibrationPointException("Impossible to convert \"" + text + "\" to double");
+        }
     }
 }

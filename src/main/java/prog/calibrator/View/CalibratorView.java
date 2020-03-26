@@ -52,10 +52,10 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     /* *//* *//* *//* *//* */ Button deleteCalibrationButton;
     /* *//* *//* *//* *//* */ Button changeCalibrationButton;
     /* *//* *//* *//* *//* */ Button createConnectionButton;
-    /* *//* *//* */ LineChart<Number, Number> signalChart;
-    /* *//* *//* *//* */ LineChart.Series<Number, Number> signalGraphSeries;
-    /* *//* *//* *//* */ NumberAxis xAxisSignalChart;
-    /* *//* *//* *//* */ NumberAxis yAxisSignalChart;
+    /* *//* */ LineChart<Number, Number> signalChart;
+    /* *//* *//* */ LineChart.Series<Number, Number> signalGraphSeries;
+    /* *//* *//* */ NumberAxis xAxisSignalChart;
+    /* *//* *//* */ NumberAxis yAxisSignalChart;
     /* *//* */ HBox signalIndicatorsContainer;
     /* *//* *//* */ TextField polynomialFormulaIndicator;
     /* *//* */ /* */HBox signalParametersContainer;
@@ -140,7 +140,6 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         Label label = new Label(ViewConstants.RAW_DATA_CALIBRATION_SETTER_LABEL, rawDataCalibrationSetter);
         label.setContentDisplay(ContentDisplay.BOTTOM);
         realDataCalibrationSetter = new TextField();
-        rawDataCalibrationSetter = new TextField();
         Label label1 = new Label(ViewConstants.REAL_DATA_CALIBRATION_SETTER_LABEL, realDataCalibrationSetter);
         label1.setContentDisplay(ContentDisplay.BOTTOM);
         label.getStyleClass().add("data-Calibration-Setter");
