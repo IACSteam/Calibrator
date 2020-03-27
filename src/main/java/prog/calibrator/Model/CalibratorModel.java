@@ -36,20 +36,25 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private DoubleProperty minValueSignal = new SimpleDoubleProperty();
     private DoubleProperty meanValueSignal = new SimpleDoubleProperty();
     private DoubleProperty rmsValueSignal = new SimpleDoubleProperty();
+    private BooleanProperty enablePolynomial = new SimpleBooleanProperty();
 
     private Timeline animation;
     private CalibrationInterface cabinetExample = new CabinetExample();
     private ObservableList<String> listOfChannels;
     private ReceiveChannel[] receiveChannels;
+    private ReceiveChannel receiveChannel;
 
-    public CalibratorModel() {
+    private double[] coefficients;
+
+    public CalibratorModel(CalibrationInterface[] cabinets) {
 
         polynomial = new SimpleStringProperty("y = 1.0x + 0");
+        calculatePolynomial = new CalculatePolynomial();
         initPolynomialData();
         initSignalChartData(1000);
-        getAllChannelsData();
-        calculatePolynomial = new CalculatePolynomial();
         createEventListeners();
+        getAllChannelsData();
+
     }
 
     private void initPolynomialData() {
@@ -60,6 +65,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         listForPolynomial.add(new LineChart.Data<>(0.0, 0.0));
         listForPoints.add(new LineChart.Data<>(1.0, 1.0));
         listForPolynomial.add(new LineChart.Data<>(1.0, 1.0));
+        calculatePolynomialData();
     }
 
     private void initSignalChartData(int amountOfPoints) {
@@ -91,6 +97,19 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         for (ReceiveChannel receiveChannel : receiveChannels) {
             listOfChannels.add(receiveChannel.getChannelName());
         }
+        getChannelData(0);
+    }
+
+    private void getChannelData(int channelNumber) {
+
+        receiveChannel = cabinetExample.getReceiveChannel(receiveChannels[channelNumber].getChannelName());
+        Float[][] calibrationPoints = receiveChannel.getCalibrationPoints();
+        List<LineChart.Data<Number, Number>> points = new ArrayList<>();
+        for (int i = 0; i <calibrationPoints.length ; i++) {
+            points.add(new LineChart.Data<Number, Number>((double)calibrationPoints[i][0], (double)calibrationPoints[i][1]));
+        }
+        listForPoints.clear();
+        listForPoints.addAll(points);
     }
 
     public static void main(String[] args) {
@@ -126,6 +145,14 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         Platform.runLater(() -> {
             listForPoints.add(new LineChart.Data<>(xCoordinate, yCoordinate));
         });
+        Float[][] points = new Float[listForPoints.size()][2];
+        int i = 0;
+        for(LineChart.Data<Number, Number> point : listForPoints) {
+            points[i++][0] = (float)point.getXValue();
+            points[i++][1] = (float)point.getXValue();
+        }
+        receiveChannel.setCalibrationPoints(points);
+
     }
 
     @Override
@@ -194,7 +221,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         for (int i = 0; i < listForPoints.size(); i++) {
             polynomialPoints.put((double) listForPoints.get(i).getXValue(), (double) listForPoints.get(i).getYValue());
         }
-        double[] coefficients = calculatePolynomial.loadData(polynomialPoints);
+        /*double[] */coefficients = calculatePolynomial.loadData(polynomialPoints);
         String[] signs = new String[3];
         ArrayList<LineChart.Data<Number, Number>> plot = new ArrayList<>();
         List<Number> listOfPointsX = listForPoints.stream().map(p -> p.getXValue()).sorted().collect(Collectors.toList());
@@ -240,12 +267,18 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        max = min = arr[0];
+
+        max = Double.MIN_VALUE;
+        min = Double.MAX_VALUE;
+
         //final ObservableList<XYChart.Data<Number, Number>> minuteList =
         //        sinusDataSeries.getData();
         Date date = new Date();
         System.out.println("before: " + date.getTime());
         for (int i = 0; i < arr.length; i++) {
+            if(enablePolynomial.get()){
+                arr[i] = arr[i]*(float)coefficients[0]+(float)coefficients[1];
+            }
             signalChartData.get(i).setYValue(arr[i]);
             //minuteList.get(i).setXValue(i + x);
             max = max < arr[i] ? arr[i] : max;
@@ -308,6 +341,10 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     public DoubleProperty rmsValueSignalProperty() {
         return rmsValueSignal;
+    }
+
+    public BooleanProperty enablePolynomialProperty() {
+        return enablePolynomial;
     }
 
     public ObservableList<String> getListOfChannels() {

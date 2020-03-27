@@ -5,6 +5,8 @@ import javafx.stage.Stage;
 import prog.calibrator.Controller.CalibratorController;
 import prog.calibrator.Model.CalibratorModel;
 import prog.calibrator.View.CalibratorView;
+import prog.calibrator.electrical_cabinet_model.interfaces.CalibrationInterface;
+import prog.calibrator.electrical_cabinet_model.model.CabinetExample;
 
 import static javafx.application.Application.launch;
 
@@ -19,9 +21,10 @@ public class Start extends Application {
     private CalibratorController calibratorController;
     @Override
     public void start(Stage primaryStage) {
-
+        CalibrationInterface gpt = new CabinetExample();
+        CalibrationInterface[] cabinets = {gpt};
         this.calibratorView = new CalibratorView(primaryStage);
-        this.calibratorModel = new CalibratorModel();
+        this.calibratorModel = new CalibratorModel(cabinets);
         this.calibratorController = new CalibratorController(calibratorView, calibratorModel);
 
     }

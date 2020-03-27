@@ -52,6 +52,7 @@ public class CalibratorController {
         calibratorView.getSignalMinimumIndicator().textProperty().bind(calibrationModel.minValueSignalProperty().asString("%.3f"));
         calibratorView.getSignalAverageIndicator().textProperty().bind(calibrationModel.meanValueSignalProperty().asString("%.3f"));
         calibratorView.getSignalRMSIndicator().textProperty().bind(calibrationModel.rmsValueSignalProperty().asString("%.3f"));
+        calibrationModel.enablePolynomialProperty().bind(calibratorView.getEnablePolynomial().selectedProperty());
     }
 
     private void addCalibrationDataItem() {
@@ -59,6 +60,8 @@ public class CalibratorController {
             Double rawElement = checkElement( calibratorView.getRawDataCalibrationSetter().getText() );
             Double realElement = checkElement( calibratorView.getRealDataCalibrationSetter().getText() );
             calibrationModel.addDataItem(rawElement, realElement);
+            calibratorView.getRawDataCalibrationSetter().setText("");
+            calibratorView.getRealDataCalibrationSetter().setText("");
         } catch (IllegalCalibrationPointException e) {
             calibratorView.getAddCalibrationButton().setDisable(true);
         }

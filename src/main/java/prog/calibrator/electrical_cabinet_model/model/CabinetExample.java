@@ -17,7 +17,8 @@ public class CabinetExample extends Observable implements CalibrationInterface {
         this.channels = new ReceiveChannel[2];
         Float[][] calibrationPoints = {
                 {0.0f, 0.0f},
-                {1.0f, 1.0f}
+                {7.0f, 7.0f},
+                {5.0f, 5.0f}
         };
         this.channels[0] = new ReceiveChannel(1, 0, "Current", 1,
                 0, 0, 3000.f, -3000.f, calibrationPoints);
@@ -132,7 +133,7 @@ class JThread extends Thread {
         sin = new SinusGenerator(3600);
     }
     public void run() {
-        int cnt = 500;
+        int cnt = 5000;
         while (cnt > 0) {
             --cnt;
             try {
@@ -148,7 +149,7 @@ class JThread extends Thread {
             this.handler.handler(EventType.Data);
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(20);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

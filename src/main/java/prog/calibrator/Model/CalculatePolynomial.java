@@ -52,7 +52,8 @@ public class CalculatePolynomial {
         List<Double> arrayY = new ArrayList<>(points.values());
         double coefficient1 = -(arrayY.get(0) - arrayY.get(1)) / (arrayX.get(1) - arrayX.get(0));
         double coefficient2 = -(arrayX.get(0) * arrayY.get(1) - arrayX.get(1) * arrayY.get(0)) / (arrayX.get(1) - arrayX.get(0));
-        return new double[]{0, coefficient1, coefficient2};
+        //return new double[]{0, coefficient1, coefficient2};
+        return new double[]{coefficient1, coefficient2};
     }
 
     /**

@@ -199,7 +199,8 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     private LineChart<Number, Number> createSignalChart() {
 
         xAxisSignalChart = new NumberAxis(0, 1000, 100);
-        yAxisSignalChart = new NumberAxis(-3, 3, 1);
+        //yAxisSignalChart = new NumberAxis(-3, 3, 1);
+        yAxisSignalChart = new NumberAxis();
         xAxisSignalChart.setLabel(ViewConstants.X_AXIS_SIGNAL_CHART_TEXT);
         yAxisSignalChart.setLabel(ViewConstants.Y_AXIS_SIGNAL_CHART_TEXT);
         signalChart = new LineChart<>(xAxisSignalChart, yAxisSignalChart);
@@ -210,6 +211,7 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         signalChart.setLegendVisible(false);
         signalChart.setTitle(ViewConstants.SIGNAL_CHART_TITLE);
         xAxisSignalChart.setForceZeroInRange(false);
+        yAxisSignalChart.setForceZeroInRange(false);
         signalGraphSeries = new XYChart.Series<>();
         signalChart.getData().add(signalGraphSeries);
         HBox.setHgrow(signalChart, Priority.ALWAYS);
