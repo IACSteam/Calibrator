@@ -155,6 +155,11 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         addCalibrationButton = new Button(ViewConstants.ADD_CALIBRATION_BUTTON_TEXT);
         deleteCalibrationButton = new Button(ViewConstants.DELETE_CALIBRATION_BUTTON_TEXT);
         changeCalibrationButton = new Button(ViewConstants.CHANGE_CALIBRATION_BUTTON_TEXT);
+
+        addCalibrationButton.setDisable(true);
+        deleteCalibrationButton.setDisable(true);
+        changeCalibrationButton.setDisable(true);
+
         createConnectionButton = new Button(ViewConstants.CREATE_CONNECTION_BUTTON_TEXT);
         calibrationButtonsContainer.getChildren().addAll(addCalibrationButton, deleteCalibrationButton,
                 changeCalibrationButton, createConnectionButton);

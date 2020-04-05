@@ -1,9 +1,13 @@
 package prog.calibrator.Controller;
 
+import javafx.event.Event;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import prog.calibrator.Model.CalibratorModelInterface;
 import prog.calibrator.View.CalibratorViewInterface;
+
+import java.util.List;
 
 public class CalibratorController {
 
@@ -27,10 +31,26 @@ public class CalibratorController {
 //        calibratorView.getRawDataCalibrationSetter().setOnKeyReleased((keyEvent) -> { checkPolynomialPointsInputFields(); });
 //        calibratorView.getRealDataCalibrationSetter().setOnKeyReleased((keyEvent) -> { checkPolynomialPointsInputFields(); });
         calibratorView.getRawDataCalibrationSetter().textProperty().addListener(
-                (observable, oldValue, newValue) -> {checkPolynomialPointsInputFields();});
+                (observable, oldValue, newValue) -> {
+                    checkPolynomialPointsInputFields();
+                });
         calibratorView.getRealDataCalibrationSetter().textProperty().addListener(
-                (observable, oldValue, newValue) -> {checkPolynomialPointsInputFields();});
-        calibratorView.getAddCalibrationButton().setOnMouseReleased((mouseEvent) -> { addCalibrationDataItem(); });
+                (observable, oldValue, newValue) -> {
+                    checkPolynomialPointsInputFields();
+                });
+        calibratorView.getAddCalibrationButton().setOnMouseReleased((mouseEvent) -> {
+            addCalibrationDataItem();
+        });
+
+        calibratorView.getChangeCalibrationButton().setOnMouseReleased((mouseEvent) -> {
+            changeCalibrationDataItem();
+        });
+
+        calibratorView.getDeleteCalibrationButton().setOnMouseReleased((mouseEvent) -> {
+            deleteCalibrationDataItem();
+        });
+
+        calibratorView.getCalibrationTable().setOnMouseClicked(mouseEvent -> tableMouseClickedEvent(mouseEvent.getClickCount()));
     }
 
     private void bindViewAndModel() {
@@ -57,8 +77,8 @@ public class CalibratorController {
 
     private void addCalibrationDataItem() {
         try {
-            Double rawElement = checkElement( calibratorView.getRawDataCalibrationSetter().getText() );
-            Double realElement = checkElement( calibratorView.getRealDataCalibrationSetter().getText() );
+            Double rawElement = checkElement(calibratorView.getRawDataCalibrationSetter().getText());
+            Double realElement = checkElement(calibratorView.getRealDataCalibrationSetter().getText());
             calibrationModel.addDataItem(rawElement, realElement);
             calibratorView.getRawDataCalibrationSetter().setText("");
             calibratorView.getRealDataCalibrationSetter().setText("");
@@ -69,11 +89,22 @@ public class CalibratorController {
 
     private void checkPolynomialPointsInputFields() {
         try {
-            Double rawElement = checkElement( calibratorView.getRawDataCalibrationSetter().getText() );
-            Double realElement = checkElement( calibratorView.getRealDataCalibrationSetter().getText() );
-            calibratorView.getAddCalibrationButton().setDisable(false);
+            Double rawElement = checkElement(calibratorView.getRawDataCalibrationSetter().getText());
+            Double realElement = checkElement(calibratorView.getRealDataCalibrationSetter().getText());
+            if (!calibrationModel.checkIfXIsUnique(rawElement)) {
+                calibratorView.getAddCalibrationButton().setDisable(true);
+                calibratorView.getDeleteCalibrationButton().setDisable(true);
+                calibratorView.getChangeCalibrationButton().setDisable(false);
+            }
+            else {
+                calibratorView.getAddCalibrationButton().setDisable(false);
+                calibratorView.getDeleteCalibrationButton().setDisable(true);
+                calibratorView.getChangeCalibrationButton().setDisable(true);
+            }
         } catch (IllegalCalibrationPointException e) {
             calibratorView.getAddCalibrationButton().setDisable(true);
+            calibratorView.getDeleteCalibrationButton().setDisable(true);
+            calibratorView.getChangeCalibrationButton().setDisable(true);
         }
     }
 
@@ -91,5 +122,64 @@ public class CalibratorController {
 //            changeAddButtonState();
             throw new IllegalCalibrationPointException("Impossible to convert \"" + text + "\" to double");
         }
+    }
+
+    private boolean checkIfRawDuplicates(double rawValue) {
+        List<LineChart.Data<Number, Number>> polynomialPoints = calibrationModel.getObservableListForPoints();
+        return polynomialPoints.stream().map(p -> p.getXValue()).anyMatch( p -> p.equals(rawValue) );
+    }
+
+    private void changeCalibrationDataItem() {
+        try {
+            Double rawElement = checkElement(calibratorView.getRawDataCalibrationSetter().getText());
+            Double realElement = checkElement(calibratorView.getRealDataCalibrationSetter().getText());
+            calibratorView.getRawDataCalibrationSetter().setText("");
+            calibratorView.getRealDataCalibrationSetter().setText("");
+            calibratorView.getRawDataCalibrationSetter().setDisable(false);
+            int index = calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex();
+            calibrationModel.updateDataItem(index, realElement);
+        } catch (IllegalCalibrationPointException e) {
+            if(calibratorView.getRawDataCalibrationSetter().getText().isEmpty()) {
+                tableMouseClickedEvent(2);
+            }
+        }
+
+
+    }
+
+    private void tableMouseClickedEvent(int clickCount) {
+        if(clickCount == 1) {
+
+            calibratorView.getRawDataCalibrationSetter().setText("");
+            calibratorView.getRealDataCalibrationSetter().setText("");
+            //calibratorView.getAddCalibrationButton().setDisable(false);
+            calibratorView.getDeleteCalibrationButton().setDisable(false);
+            calibratorView.getChangeCalibrationButton().setDisable(false);
+            calibratorView.getRawDataCalibrationSetter().setDisable(false);
+
+        }
+        if(clickCount > 1) {
+
+            LineChart.Data<Number, Number> dataItem = calibrationModel.getDataItem(calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex());
+            calibratorView.getRawDataCalibrationSetter().setText(dataItem.getXValue().toString());
+            calibratorView.getRealDataCalibrationSetter().setText(dataItem.getYValue().toString());
+
+            //calibratorView.getAddCalibrationButton().setDisable(true);
+            calibratorView.getDeleteCalibrationButton().setDisable(false);
+            calibratorView.getChangeCalibrationButton().setDisable(false);
+            calibratorView.getRawDataCalibrationSetter().setDisable(true);
+
+
+
+        }
+    }
+
+    private void deleteCalibrationDataItem(){
+        calibrationModel.deleteDataItem(calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex());
+        calibratorView.getRawDataCalibrationSetter().setText("");
+        calibratorView.getRealDataCalibrationSetter().setText("");
+        calibratorView.getDeleteCalibrationButton().setDisable(false);
+        calibratorView.getChangeCalibrationButton().setDisable(false);
+        calibratorView.getRawDataCalibrationSetter().setDisable(false);
     }
 }

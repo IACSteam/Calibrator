@@ -15,6 +15,8 @@ public interface CalibratorModelInterface {
     boolean checkIfXIsUnique(Double xCoordinate);
     void deleteDataItem(int index);
     void addDataItem(Double xCoordinate, Double yCoordinate);
+    void updateDataItem(int index, Double yCoordinate);
+    LineChart.Data<Number, Number> getDataItem(int index);
     void readDataFromFile(String filePath);
     void generateRandomData();
     void registerObserver(PolynomialObserver observer);

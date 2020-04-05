@@ -145,14 +145,27 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         Platform.runLater(() -> {
             listForPoints.add(new LineChart.Data<>(xCoordinate, yCoordinate));
         });
-        Float[][] points = new Float[listForPoints.size()][2];
+        /*Float[][] points = new Float[listForPoints.size()][2];
         int i = 0;
         for(LineChart.Data<Number, Number> point : listForPoints) {
             points[i++][0] = (float)point.getXValue();
             points[i++][1] = (float)point.getXValue();
         }
-        receiveChannel.setCalibrationPoints(points);
+        receiveChannel.setCalibrationPoints(points);*/
 
+    }
+
+    @Override
+    public void updateDataItem(int index, Double yCoordinate) {
+        LineChart.Data<Number, Number> point = listForPoints.get(index);
+                point.setYValue(yCoordinate);
+                calculatePolynomialData();
+    }
+
+    @Override
+    public LineChart.Data<Number, Number> getDataItem(int index) {
+
+            return listForPoints.get(index);
     }
 
     @Override
