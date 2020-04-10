@@ -149,7 +149,7 @@ class JThread extends Thread {
             this.handler.handler(EventType.Data);
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

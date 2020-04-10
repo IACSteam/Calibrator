@@ -17,10 +17,7 @@ public interface CalibratorModelInterface {
     void addDataItem(Double xCoordinate, Double yCoordinate);
     void updateDataItem(int index, Double yCoordinate);
     LineChart.Data<Number, Number> getDataItem(int index);
-    void readDataFromFile(String filePath);
     void generateRandomData();
-    void registerObserver(PolynomialObserver observer);
-    void removeObserver(PolynomialObserver observer);
     StringProperty getPolynomialProperty();
     List<XYChart.Data<Number, Number>> getSignalChartData();
     ObservableList<String> getListOfChannels();

@@ -4,6 +4,7 @@ import javafx.event.Event;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import prog.calibrator.Model.CalibratorModel;
 import prog.calibrator.Model.CalibratorModelInterface;
 import prog.calibrator.View.CalibratorViewInterface;
 
@@ -54,6 +55,7 @@ public class CalibratorController {
     }
 
     private void bindViewAndModel() {
+        CalibratorModel model = new CalibratorModel();
         calibratorView.getRawDataColumnCalibrationTable().
                 setCellValueFactory(new PropertyValueFactory<LineChart.Data<Number, Number>, Number>("XValue"));
         calibratorView.getRealDataColumnCalibrationTable().
@@ -64,7 +66,8 @@ public class CalibratorController {
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialGraphSeries());
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialPointsSeries());
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
-        calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
+        //calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
+        calibratorView.getSignalGraphSeries().dataProperty().bind(model.lp1);
         calibratorView.getChannelsList().getItems().addAll(calibrationModel.getListOfChannels());
 
         calibratorView.getSignalAmplitudeIndicator().textProperty().bind(calibrationModel.amplitudeSignalProperty().asString("%.3f"));
