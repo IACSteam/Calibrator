@@ -14,8 +14,8 @@ public interface CalibratorModelInterface {
     ObservableList<LineChart.Data<Number, Number>> getObservableListForPolynomial();
     boolean checkIfXIsUnique(Double xCoordinate);
     void deleteDataItem(int index);
-    void addDataItem(Double xCoordinate, Double yCoordinate);
-    void updateDataItem(int index, Double yCoordinate);
+    void addCalibrationPoint(Double xCoordinate, Double yCoordinate);
+    void updateCalibrationPoint(int index, Double yCoordinate);
     LineChart.Data<Number, Number> getDataItem(int index);
     void generateRandomData();
     StringProperty getPolynomialProperty();

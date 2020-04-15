@@ -247,9 +247,9 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         });
     };
     private Pane addSystemInfoPane() {
-        var javaVersion = SystemInfo.javaVersion();
-        var javafxVersion = SystemInfo.javafxVersion();
-        var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
+        String javaVersion = SystemInfo.javaVersion();
+        String javafxVersion = SystemInfo.javafxVersion();
+        Label label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
         return systemInfoPane = new StackPane(label);
     }
 

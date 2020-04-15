@@ -147,9 +147,10 @@ class JThread extends Thread {
                 System.out.println("С семафором в потоке обновления данных при записи что-то пошло не так.");
             }
             this.handler.handler(EventType.Data);
+            System.out.println("cabinet " + System.currentTimeMillis() + " cnt= " + cnt + " Thread: " + Thread.currentThread().getName());
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(2500);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

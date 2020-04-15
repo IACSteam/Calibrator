@@ -21,9 +21,8 @@ public class Start extends Application {
     private CalibratorController calibratorController;
     @Override
     public void start(Stage primaryStage) {
-        CalibrationInterface gpt = new CabinetExample();
         this.calibratorView = new CalibratorView(primaryStage);
-        this.calibratorModel = new CalibratorModel();
+        this.calibratorModel = CalibratorModel.getInstance();
         this.calibratorController = new CalibratorController(calibratorView, calibratorModel);
 
     }

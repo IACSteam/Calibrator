@@ -21,15 +21,19 @@ import prog.calibrator.electrical_cabinet_model.observer.EventType;
 import prog.calibrator.electrical_cabinet_model.observer.ObserverElectricalCabinet;
 
 
-import java.time.chrono.ThaiBuddhistEra;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class CalibratorModel implements CalibratorModelInterface, ObserverElectricalCabinet {
 
     private ObservableList<LineChart.Data<Number, Number>> listForPoints;
     private ObservableList<LineChart.Data<Number, Number>> listForPolynomial;
-    private List<XYChart.Data<Number, Number>> signalChartData;
+    //private List<XYChart.Data<Number, Number>> signalChartData;
     private CalculatePolynomial calculatePolynomial;
     private String polynomialString;
     private StringProperty polynomial;
@@ -40,99 +44,71 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private DoubleProperty rmsValueSignal = new SimpleDoubleProperty();
     private BooleanProperty enablePolynomial = new SimpleBooleanProperty();
 
-    public static ListProperty<LineChart.Data<Number, Number>> lp1 =
+    public ListProperty<LineChart.Data<Number, Number>> lp1 =
             new SimpleListProperty<>(FXCollections.observableArrayList());
+    public ListProperty<LineChart.Data<Number, Number>> listForPoints1 = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private Timeline animation;
     private CalibrationInterface cabinetExample = new CabinetExample();
     private ObservableList<String> listOfChannels;
     private ReceiveChannel[] receiveChannels;
     private ReceiveChannel receiveChannel;
-
-    private ObservableList<XYChart.Data<Number, Number>> signalChartDataLocalBuffer[] = new ObservableList[2];
-    private int bufferNumber = 0;
-    private volatile Boolean waitData = false;
+    UpdateSignalData updateSignalData = new UpdateSignalData();
 
     private double[] coefficients;
-    private volatile Boolean newElectricalCabinetData = false;
+    //private volatile Boolean newElectricalCabinetDataReady = false;
+    private volatile AtomicBoolean newElectricalCabinetDataReady = new AtomicBoolean(false);
 
+    // Add observable for list item updates.
     Callback<LineChart.Data<Number, Number>, javafx.beans.Observable[]> extractor = (LineChart.Data<Number, Number> p) -> {
 
         return new Observable[]{p.XValueProperty(), p.YValueProperty()};
     };
+    ScheduledExecutorService updatePlotExecutor = Executors.newScheduledThreadPool(1);
 
-    public CalibratorModel() {
+    /*
+     * Methods ready to work in multithreading applications
+     * */
+    @Override
+    public void notify(EventType e) {
+        if (e == EventType.Data) {
+            newElectricalCabinetDataReady.set(true);
+            System.out.println("notify " + System.currentTimeMillis());
+        }
+    }
+
+
+    //*********************************************************************************
+    static CalibratorModel instance = null;
+    public static CalibratorModel getInstance() {
+
+        if(instance == null) instance = new CalibratorModel();
+        return instance;
+    }
+
+    private CalibratorModel() {
 
         polynomial = new SimpleStringProperty("y = 1.0x + 0");
         calculatePolynomial = new CalculatePolynomial();
         initPolynomialData();
-        initSignalChartData(1000);
         createEventListeners();
         getAllChannelsData();
-
+        ScheduledFuture scheduledFuture = updatePlotExecutor.scheduleAtFixedRate(updateSignalData, 1000, 100, TimeUnit.MILLISECONDS);
+        cabinetExample.subscribe(this);
     }
-    /*public CalibratorModel() {
-            }*/
 
     private void initPolynomialData() {
 
         listForPoints = FXCollections.observableArrayList(extractor);
+        listForPoints1.set(listForPoints);
         listForPolynomial = FXCollections.observableArrayList();
         listForPoints.add(new LineChart.Data<>(0.0, 0.0));
         listForPolynomial.add(new LineChart.Data<>(0.0, 0.0));
         listForPoints.add(new LineChart.Data<>(1.0, 1.0));
         listForPolynomial.add(new LineChart.Data<>(1.0, 1.0));
         //calculatePolynomialData();
-        Thread calculatePolynomialDataThread = new Thread(calculatePolynomialDataRunnable);
-        calculatePolynomialDataThread.start();
-}
-
-    private void updateSignalChartData() {
-        signalChartData = signalChartDataLocalBuffer[bufferNumber];
-        bufferNumber = bufferNumber == 0 ? 1 : 0;
-    }
-
-    private void initSignalChartData(int amountOfPoints) {
-
-        signalChartDataLocalBuffer[0] = FXCollections.observableArrayList();
-        signalChartDataLocalBuffer[1] = FXCollections.observableArrayList();
-        lp1.set(signalChartDataLocalBuffer[0]);
-        for (double m = 0; m < amountOfPoints; m++) {
-            signalChartDataLocalBuffer[0].add(new XYChart.Data<Number, Number>(m, 10));
-            signalChartDataLocalBuffer[1].add(new XYChart.Data<Number, Number>(m, 10));
-        }
-        updateSignalChartData();
-        cabinetExample.subscribe(this);
-
-        final KeyFrame frame =
-                new KeyFrame(Duration.millis(1000 / 10),
-                        (ActionEvent actionEvent) -> {
-                            //Date date = new Date();
-                            //System.out.println("before: " + date.getTime());
-                            //nextTime();
-                            //updatePlot();
-                            System.out.println("qwerty " + waitData);
-                            synchronized (waitData) {
-                                if (!waitData) {
-                                    //newElectricalCabinetData = false;
-                                    Thread thread = new Thread(runnable);
-                                    thread.start();
-                                    //updatePlot();
-
-                                    Date date = new Date();
-                                    System.out.println("in: " + date.getTime());
-                                }
-                                else {
-                                    Date date = new Date();
-                                    System.out.println("out: " + date.getTime());
-                                }
-                            }
-//
-                        });
-        animation = new Timeline();
-        animation.getKeyFrames().add(frame);
-        animation.setCycleCount(Animation.INDEFINITE);
-        play();
+//        Thread calculatePolynomialDataThread = new Thread(calculatePolynomialDataRunnable);
+//        calculatePolynomialDataThread.start();
     }
 
     private void getAllChannelsData() {
@@ -162,7 +138,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
 
     @Override
     public List<XYChart.Data<Number, Number>> getSignalChartData() {
-        return signalChartData;
+        return null;//signalChartData;
     }
 
     @Override
@@ -185,7 +161,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     }
 
     @Override
-    public void addDataItem(Double xCoordinate, Double yCoordinate) {
+    public void addCalibrationPoint(Double xCoordinate, Double yCoordinate) {
         Platform.runLater(() -> {
             listForPoints.add(new LineChart.Data<>(xCoordinate, yCoordinate));
         });
@@ -200,9 +176,19 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     }
 
     @Override
-    public void updateDataItem(int index, Double yCoordinate) {
-        LineChart.Data<Number, Number> point = listForPoints.get(index);
-        point.setYValue(yCoordinate);
+    public void updateCalibrationPoint(int index, Double yCoordinate) {
+
+            LineChart.Data<Number, Number> point = listForPoints.get(index);
+            LineChart.Data<Number, Number> newPoint = new XYChart.Data<>();
+            newPoint.setXValue(point.getXValue());
+            newPoint.setYValue(yCoordinate);
+            listForPoints.set(index, newPoint);
+                    //
+            //point.YValueProperty().setValue(yCoordinate);
+            //listForPoints.remove(point);
+            //point.setYValue(yCoordinate);
+            //listForPoints.add(point);
+
         //calculatePolynomialData();
     }
 
@@ -229,10 +215,10 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
             aaa.add(new LineChart.Data<>(value1, value2));
         }
 
-        Platform.runLater(() -> {
+        //Platform.runLater(() -> {
             listForPoints.clear();
             listForPoints.addAll(aaa);
-        });
+        //});
     }
 
 
@@ -242,15 +228,15 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
             if (listEvent.getList().size() > 0) {
                 Thread calculatePolynomialDataThread = new Thread(calculatePolynomialDataRunnable);
                 calculatePolynomialDataThread.start();
+            } else System.out.println("1234567");
+        });
+
+        enablePolynomial.addListener((observable, oldValue, newValue) -> {
+            if(cabinetExample != null) {
+                updateSignalData.calculateSignalParameters();
             }
-            else System.out.println("1234567");
         });
     }
-
-    Runnable runnable = () -> {
-
-        updatePlot();
-    };
 
     Runnable calculatePolynomialDataRunnable = () -> {
 
@@ -260,7 +246,7 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     private void calculatePolynomialData() {
 
         try {
-            Thread.sleep(5000);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -308,62 +294,8 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         });
     }
 
-    private void updatePlot() {
 
-        System.out.println("updatePlot " + waitData);
-        //synchronized (waitData) {
-            System.out.println("updatePlot1 " + waitData);
-            if (!waitData) {
-                //System.out.println("updatePlot5 " + waitData);
-                waitData = true;
-                System.out.println("newElectricalCabinetData " + newElectricalCabinetData);
-                while (!newElectricalCabinetData) {
-                }
-                newElectricalCabinetData = false;
-                double mean = 0.0, max = 0.0, min = 0.0, amplitude = 0.0, rms = 0.0;
-                Float[] arr = new Float[0];
-                try {
-                    arr = cabinetExample.getChannelData(0);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                max = Double.MIN_VALUE;
-                min = Double.MAX_VALUE;
 
-//        Date date = new Date();
-//        System.out.println("before: " + date.getTime());
-
-                for (int i = 0; i < arr.length; i++) {
-                    arr[i] = enablePolynomial.get() ? arr[i] * (float) coefficients[0] + (float) coefficients[1] : arr[i];
-                    signalChartDataLocalBuffer[bufferNumber].get(i).setYValue(arr[i]);
-                    max = max < arr[i] ? arr[i] : max;
-                    min = min > arr[i] ? arr[i] : min;
-                    mean += arr[i];
-                    rms += Math.pow(arr[i], 2);
-                }
-                mean = mean / arr.length;
-                rms = Math.sqrt(rms / arr.length);
-                amplitude = max - min;
-
-                updateSignalChartData();
-                waitData = false;
-                System.out.println("asdfgh " + waitData);
-                double finalAmplitude = amplitude, finalMax = max, finalMin = min, finalMean = mean, finalRMS = rms;
-                Platform.runLater(() -> {
-                    //signalChartData.clear();
-                    //signalChartData.addAll(signalChartDataLocalBuffer[bufferNumber]);
-                    lp1.set(signalChartDataLocalBuffer[bufferNumber]);
-                    amplitudeSignal.set(finalAmplitude);
-                    maxValueSignal.set(finalMax);
-                    minValueSignal.set(finalMin);
-                    meanValueSignal.set(finalMean);
-                    rmsValueSignal.set(finalRMS);
-                });
-                //Date date1 = new Date();
-                //System.out.println(amplitude +" "+max +" "+min +" "+mean +" "+rms);
-            }
-        //}
-    }
 
     public void play() {
         animation.play();
@@ -377,14 +309,6 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
         return polynomial;
     }
 
-    @Override
-    public void notify(EventType e) {
-        if (e == EventType.Data) {
-            newElectricalCabinetData = true;
-//            Thread thread = new Thread(runnable);
-//            thread.start();
-        }
-    }
 
     public DoubleProperty amplitudeSignalProperty() {
         return amplitudeSignal;
@@ -414,4 +338,103 @@ public class CalibratorModel implements CalibratorModelInterface, ObserverElectr
     public ObservableList<String> getListOfChannels() {
         return listOfChannels;
     }
+
+//**********************************************************************************************************************
+// Class that builds signal plot and calculates signal parameters
+//**********************************************************************************************************************
+
+    private class UpdateSignalData implements Runnable {
+
+        private ObservableList<XYChart.Data<Number, Number>> signalChartDataLocalBuffer[] = new ObservableList[2];
+        private int bufferNumber = 0;
+        private Float[] channelDataArray;
+        private AtomicBoolean GUIReady = new AtomicBoolean(true);
+
+        public UpdateSignalData() {
+            this(1000);
+        }
+
+        public UpdateSignalData(int amountOfPoints) {
+            initSignalChartData(amountOfPoints);
+        }
+
+        private void initSignalChartData(int amountOfPoints) {
+
+            signalChartDataLocalBuffer[0] = FXCollections.observableArrayList();
+            signalChartDataLocalBuffer[1] = FXCollections.observableArrayList();
+            lp1.set(signalChartDataLocalBuffer[0]);
+            for (double m = 0; m < amountOfPoints; m++) {
+                signalChartDataLocalBuffer[0].add(new XYChart.Data<Number, Number>(m, 10));
+                signalChartDataLocalBuffer[1].add(new XYChart.Data<Number, Number>(m, 10));
+            }
+            updateSignalChartData();
+        }
+
+        private synchronized void updateSignalChartData() {
+
+            //signalChartData = signalChartDataLocalBuffer[bufferNumber];
+            bufferNumber = bufferNumber == 0 ? 1 : 0;
+        }
+
+        @Override
+        public void run() {
+            updatePlot();
+        }
+
+        private void updatePlot() {
+
+            while (!GUIReady.compareAndSet(true, false)) {}
+            while (!newElectricalCabinetDataReady.compareAndSet(true, false)) { } // TODO: change to Atomic or make synchronized method
+            //newElectricalCabinetDataReady = false;
+            synchronized (this) {
+                channelDataArray = requestElectricalCabinetChannelData();
+                updateSignalChartData();
+                calculateSignalParameters();
+            }
+        }
+
+        public synchronized void calculateSignalParameters() {
+
+            double mean = 0.0, max = 0.0, min = 0.0, amplitude = 0.0, rms = 0.0;
+            double arrayElement = 0;
+            max = Double.MIN_VALUE;
+            min = Double.MAX_VALUE;
+            System.out.println(System.currentTimeMillis());
+
+            for (int i = 0; i < channelDataArray.length; i++) {
+                arrayElement = enablePolynomial.get() ? channelDataArray[i] * (float) coefficients[0] + (float) coefficients[1] : channelDataArray[i];
+                signalChartDataLocalBuffer[bufferNumber].get(i).setYValue(arrayElement);
+                max = max < arrayElement ? arrayElement : max;
+                min = min > arrayElement ? arrayElement : min;
+                mean += arrayElement;
+                rms += Math.pow(arrayElement, 2);
+            }
+            mean = mean / channelDataArray.length;
+            rms = Math.sqrt(rms / channelDataArray.length);
+            amplitude = max - min;
+
+            double finalAmplitude = amplitude, finalMax = max, finalMin = min, finalMean = mean, finalRMS = rms;
+            Platform.runLater(() -> {
+                lp1.set(signalChartDataLocalBuffer[bufferNumber]);
+                amplitudeSignal.set(finalAmplitude);
+                maxValueSignal.set(finalMax);
+                minValueSignal.set(finalMin);
+                meanValueSignal.set(finalMean);
+                rmsValueSignal.set(finalRMS);
+                GUIReady.set(true);
+            });
+        }
+
+        private synchronized Float[] requestElectricalCabinetChannelData() {
+
+            try {
+                return cabinetExample.getChannelData(0);
+            } catch (InterruptedException e) {
+                return null;
+            }
+        }
+
+    }
 }
+
+

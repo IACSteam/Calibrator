@@ -1,9 +1,7 @@
 package prog.calibrator.Controller;
 
-import javafx.event.Event;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import prog.calibrator.Model.CalibratorModel;
 import prog.calibrator.Model.CalibratorModelInterface;
 import prog.calibrator.View.CalibratorViewInterface;
@@ -55,7 +53,7 @@ public class CalibratorController {
     }
 
     private void bindViewAndModel() {
-        CalibratorModel model = new CalibratorModel();
+        CalibratorModel model = CalibratorModel.getInstance();
         calibratorView.getRawDataColumnCalibrationTable().
                 setCellValueFactory(new PropertyValueFactory<LineChart.Data<Number, Number>, Number>("XValue"));
         calibratorView.getRealDataColumnCalibrationTable().
@@ -82,7 +80,7 @@ public class CalibratorController {
         try {
             Double rawElement = checkElement(calibratorView.getRawDataCalibrationSetter().getText());
             Double realElement = checkElement(calibratorView.getRealDataCalibrationSetter().getText());
-            calibrationModel.addDataItem(rawElement, realElement);
+            calibrationModel.addCalibrationPoint(rawElement, realElement);
             calibratorView.getRawDataCalibrationSetter().setText("");
             calibratorView.getRealDataCalibrationSetter().setText("");
         } catch (IllegalCalibrationPointException e) {
@@ -140,7 +138,7 @@ public class CalibratorController {
             calibratorView.getRealDataCalibrationSetter().setText("");
             calibratorView.getRawDataCalibrationSetter().setDisable(false);
             int index = calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex();
-            calibrationModel.updateDataItem(index, realElement);
+            calibrationModel.updateCalibrationPoint(index, realElement);
         } catch (IllegalCalibrationPointException e) {
             if(calibratorView.getRawDataCalibrationSetter().getText().isEmpty()) {
                 tableMouseClickedEvent(2);

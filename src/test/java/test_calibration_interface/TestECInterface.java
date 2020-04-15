@@ -18,6 +18,7 @@ class TestECInterface implements ObserverElectricalCabinet {
     CalibrationInterface cabinet = new CabinetExample();
 
     public static void main(String[] args) {
+
         TestECInterface main = new TestECInterface();
         main.run();
     }
