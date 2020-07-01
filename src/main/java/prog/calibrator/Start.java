@@ -21,9 +21,12 @@ public class Start extends Application {
     private CalibratorController calibratorController;
     @Override
     public void start(Stage primaryStage) {
+
+        CalibrationInterface[] electricalCabinets = {new CabinetExample()};
         this.calibratorView = new CalibratorView(primaryStage);
-        this.calibratorModel = CalibratorModel.getInstance();
-        this.calibratorController = new CalibratorController(calibratorView, calibratorModel);
+        this.calibratorModel = new CalibratorModel();
+        calibratorModel.setElectricalCabinets(electricalCabinets);
+        this.calibratorController = new CalibratorController(calibratorView, calibratorModel.getGUICalibratorModel());
 
     }
 }

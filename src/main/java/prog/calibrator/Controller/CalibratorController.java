@@ -2,9 +2,9 @@ package prog.calibrator.Controller;
 
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.cell.PropertyValueFactory;
-import prog.calibrator.Model.CalibratorModel;
 import prog.calibrator.Model.CalibratorModelInterface;
 import prog.calibrator.View.CalibratorViewInterface;
+import prog.calibrator.View.ViewConstants;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class CalibratorController {
     }
 
     private void initializeEvents() {
-        calibratorView.getCreateConnectionButton().setOnMouseReleased((value) -> {
+        calibratorView.getGenerateRandomPointsButton().setOnMouseReleased((value) -> {
             calibrationModel.generateRandomData();
         });
 
@@ -49,11 +49,15 @@ public class CalibratorController {
             deleteCalibrationDataItem();
         });
 
+        calibratorView.getCreateConnectionButton().setOnMouseReleased((mouseEvent) -> {
+            manageConnection();
+        });
+
         calibratorView.getCalibrationTable().setOnMouseClicked(mouseEvent -> tableMouseClickedEvent(mouseEvent.getClickCount()));
     }
 
     private void bindViewAndModel() {
-        CalibratorModel model = CalibratorModel.getInstance();
+
         calibratorView.getRawDataColumnCalibrationTable().
                 setCellValueFactory(new PropertyValueFactory<LineChart.Data<Number, Number>, Number>("XValue"));
         calibratorView.getRealDataColumnCalibrationTable().
@@ -64,8 +68,7 @@ public class CalibratorController {
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialGraphSeries());
         calibratorView.getPolynomialChart().getData().add(calibratorView.getPolynomialPointsSeries());
         calibratorView.getPolynomialFormulaIndicator().textProperty().bind(calibrationModel.getPolynomialProperty());
-        //calibratorView.getSignalGraphSeries().getData().addAll(calibrationModel.getSignalChartData());
-        calibratorView.getSignalGraphSeries().dataProperty().bind(model.lp1);
+        calibratorView.getSignalGraphSeries().dataProperty().bind(calibrationModel.signalChartPointsProperty());
         calibratorView.getChannelsList().getItems().addAll(calibrationModel.getListOfChannels());
 
         calibratorView.getSignalAmplitudeIndicator().textProperty().bind(calibrationModel.amplitudeSignalProperty().asString("%.3f"));
@@ -96,8 +99,7 @@ public class CalibratorController {
                 calibratorView.getAddCalibrationButton().setDisable(true);
                 calibratorView.getDeleteCalibrationButton().setDisable(true);
                 calibratorView.getChangeCalibrationButton().setDisable(false);
-            }
-            else {
+            } else {
                 calibratorView.getAddCalibrationButton().setDisable(false);
                 calibratorView.getDeleteCalibrationButton().setDisable(true);
                 calibratorView.getChangeCalibrationButton().setDisable(true);
@@ -127,7 +129,7 @@ public class CalibratorController {
 
     private boolean checkIfRawDuplicates(double rawValue) {
         List<LineChart.Data<Number, Number>> polynomialPoints = calibrationModel.getObservableListForPoints();
-        return polynomialPoints.stream().map(p -> p.getXValue()).anyMatch( p -> p.equals(rawValue) );
+        return polynomialPoints.stream().map(p -> p.getXValue()).anyMatch(p -> p.equals(rawValue));
     }
 
     private void changeCalibrationDataItem() {
@@ -140,7 +142,7 @@ public class CalibratorController {
             int index = calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex();
             calibrationModel.updateCalibrationPoint(index, realElement);
         } catch (IllegalCalibrationPointException e) {
-            if(calibratorView.getRawDataCalibrationSetter().getText().isEmpty()) {
+            if (calibratorView.getRawDataCalibrationSetter().getText().isEmpty()) {
                 tableMouseClickedEvent(2);
             }
         }
@@ -149,7 +151,7 @@ public class CalibratorController {
     }
 
     private void tableMouseClickedEvent(int clickCount) {
-        if(clickCount == 1) {
+        if (clickCount == 1) {
 
             calibratorView.getRawDataCalibrationSetter().setText("");
             calibratorView.getRealDataCalibrationSetter().setText("");
@@ -159,7 +161,7 @@ public class CalibratorController {
             calibratorView.getRawDataCalibrationSetter().setDisable(false);
 
         }
-        if(clickCount > 1) {
+        if (clickCount > 1) {
 
             LineChart.Data<Number, Number> dataItem = calibrationModel.getDataItem(calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex());
             calibratorView.getRawDataCalibrationSetter().setText(dataItem.getXValue().toString());
@@ -171,16 +173,24 @@ public class CalibratorController {
             calibratorView.getRawDataCalibrationSetter().setDisable(true);
 
 
-
         }
     }
 
-    private void deleteCalibrationDataItem(){
+    private void deleteCalibrationDataItem() {
         calibrationModel.deleteDataItem(calibratorView.getCalibrationTable().getSelectionModel().getSelectedIndex());
         calibratorView.getRawDataCalibrationSetter().setText("");
         calibratorView.getRealDataCalibrationSetter().setText("");
         calibratorView.getDeleteCalibrationButton().setDisable(false);
         calibratorView.getChangeCalibrationButton().setDisable(false);
         calibratorView.getRawDataCalibrationSetter().setDisable(false);
+    }
+
+    private void manageConnection() {
+        boolean selectedStatus = calibratorView.getCreateConnectionButton().isSelected();
+        String text = selectedStatus ?
+                ViewConstants.CREATE_CONNECTION_BUTTON_TEXT_TRUE : ViewConstants.CREATE_CONNECTION_BUTTON_TEXT_FALSE;
+        calibratorView.getCreateConnectionButton().setText(text);
+        if(selectedStatus) {calibrationModel.startSignalReceive();}
+        else {calibrationModel.stopSignalReceive();}
     }
 }

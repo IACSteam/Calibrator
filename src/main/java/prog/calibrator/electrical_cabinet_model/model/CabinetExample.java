@@ -27,6 +27,7 @@ public class CabinetExample extends Observable implements CalibrationInterface {
         this.data = new Float[2][1000];
         this.sem = new Semaphore(1);
         thr = new JThread(data,(e) -> update(e),sem);
+        thr.setDaemon(true);
         thr.start();
     }
 
@@ -133,6 +134,7 @@ class JThread extends Thread {
         sin = new SinusGenerator(3600);
     }
     public void run() {
+
         int cnt = 5000;
         while (cnt > 0) {
             --cnt;
@@ -150,7 +152,7 @@ class JThread extends Thread {
             System.out.println("cabinet " + System.currentTimeMillis() + " cnt= " + cnt + " Thread: " + Thread.currentThread().getName());
 
             try {
-                Thread.sleep(2500);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 System.out.println("Thread has been interrupted");
             }

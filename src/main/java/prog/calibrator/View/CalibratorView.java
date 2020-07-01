@@ -3,8 +3,6 @@ package prog.calibrator.View;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -51,7 +49,8 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
     /* *//* *//* *//* *//* */ Button addCalibrationButton;
     /* *//* *//* *//* *//* */ Button deleteCalibrationButton;
     /* *//* *//* *//* *//* */ Button changeCalibrationButton;
-    /* *//* *//* *//* *//* */ Button createConnectionButton;
+    /* *//* *//* *//* *//* */ ToggleButton createConnectionButton;
+    /* *//* *//* *//* *//* */ Button generateRandomPointsButton;
     /* *//* */ LineChart<Number, Number> signalChart;
     /* *//* *//* */ LineChart.Series<Number, Number> signalGraphSeries;
     /* *//* *//* */ NumberAxis xAxisSignalChart;
@@ -155,14 +154,16 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         addCalibrationButton = new Button(ViewConstants.ADD_CALIBRATION_BUTTON_TEXT);
         deleteCalibrationButton = new Button(ViewConstants.DELETE_CALIBRATION_BUTTON_TEXT);
         changeCalibrationButton = new Button(ViewConstants.CHANGE_CALIBRATION_BUTTON_TEXT);
+        createConnectionButton = new ToggleButton(ViewConstants.CREATE_CONNECTION_BUTTON_TEXT_FALSE);
 
         addCalibrationButton.setDisable(true);
         deleteCalibrationButton.setDisable(true);
         changeCalibrationButton.setDisable(true);
+        //createConnectionButton.setDisable(true);
 
-        createConnectionButton = new Button(ViewConstants.CREATE_CONNECTION_BUTTON_TEXT);
+        generateRandomPointsButton = new Button("Generate");
         calibrationButtonsContainer.getChildren().addAll(addCalibrationButton, deleteCalibrationButton,
-                changeCalibrationButton, createConnectionButton);
+                changeCalibrationButton, createConnectionButton, generateRandomPointsButton);
         return calibrationButtonsContainer;
     }
 
@@ -353,8 +354,12 @@ public class CalibratorView /*extends Application*/ implements CalibratorViewInt
         return changeCalibrationButton;
     }
 
-    public Button getCreateConnectionButton() {
+    public ToggleButton getCreateConnectionButton() {
         return createConnectionButton;
+    }
+
+    public Button getGenerateRandomPointsButton() {
+        return generateRandomPointsButton;
     }
 
     public LineChart<Number, Number> getSignalChart() {

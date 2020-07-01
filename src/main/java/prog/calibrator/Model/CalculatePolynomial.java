@@ -24,10 +24,10 @@ public class CalculatePolynomial {
     public double[] loadData(Map<Double, Double> pointsXY) {
         points = pointsXY;
         if (points.isEmpty())
-            return new double[]{0, 0, 0};
+            return new double[]{0, 0};
         if (points.size() == 1) {
             List<Double> arrayY = new ArrayList<>(points.values());
-            return new double[]{0, 0, arrayY.get(0)};
+            return new double[]{0, arrayY.get(0)};
         }
         if (points.size() == 2) {
             return findCoefficientsForTwoPoints(points);

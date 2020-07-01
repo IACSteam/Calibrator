@@ -2,6 +2,7 @@ package prog.calibrator.Model;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
@@ -18,8 +19,9 @@ public interface CalibratorModelInterface {
     void updateCalibrationPoint(int index, Double yCoordinate);
     LineChart.Data<Number, Number> getDataItem(int index);
     void generateRandomData();
+    void startSignalReceive();
+    void stopSignalReceive();
     StringProperty getPolynomialProperty();
-    List<XYChart.Data<Number, Number>> getSignalChartData();
     ObservableList<String> getListOfChannels();
 
     DoubleProperty amplitudeSignalProperty();
@@ -28,4 +30,5 @@ public interface CalibratorModelInterface {
     DoubleProperty meanValueSignalProperty();
     DoubleProperty rmsValueSignalProperty();
     BooleanProperty enablePolynomialProperty();
+    ListProperty<XYChart.Data<Number, Number>> signalChartPointsProperty();
 }

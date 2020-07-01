@@ -28,7 +28,8 @@ public interface CalibratorViewInterface {
     Button getAddCalibrationButton();
     Button getDeleteCalibrationButton();
     Button getChangeCalibrationButton();
-    Button getCreateConnectionButton();
+    ToggleButton getCreateConnectionButton();
+    Button getGenerateRandomPointsButton();
     LineChart<Number, Number> getSignalChart();
     XYChart.Series<Number, Number> getSignalGraphSeries();
     NumberAxis getXAxisSignalChart();

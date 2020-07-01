@@ -68,7 +68,7 @@
     -fx-spacing: 6;
     -fx-padding: 45 7 3 3;
 }
-.calibration-Buttons-Container .button {
+.calibration-Buttons-Container .button, .toggle-button {
     -fx-max-width: 1000;
 }
 
